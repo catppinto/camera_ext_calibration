@@ -1,0 +1,5 @@
+paper : 
+http://research.microsoft.com/en-us/um/people/zhang/Papers/Camera%20Calibration%20-%20book%20chapter.pdf
+
+Z. Zhang, "Camera Calibration",   Chapter 2, pages 4-43, in G. Medioni and S.B. Kang, eds., Emergin Topics in Computer Vision, Prentice Hall Professional Technical Reference, 2004.
+This book chapter provides an overview of various camera calibration techniques, including using 3D calibration appratus, 3D planar pattern, 1D linear points, and just points from the environment (0D). Available at Camera Calibration - book chapter.pdf
