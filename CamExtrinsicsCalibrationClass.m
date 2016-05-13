@@ -8,6 +8,7 @@ classdef CamExtrinsicsCalibrationClass
         proj_matrix
         
         cam_points
+        cam_points_prior_noise
         wld_points
         
         % G matrix
@@ -15,12 +16,8 @@ classdef CamExtrinsicsCalibrationClass
         %
         proj_matrix_computed
        
-        R_int
-        R_int_n
-        t_int
-        R_noint
-        R_noint_n
-        t_noint
+        R_ext
+        t_ext
         
     end
     methods
@@ -42,110 +39,111 @@ classdef CamExtrinsicsCalibrationClass
 
         end
         
-        function obj = CalculateExtrinsics(obj, cam_points)
+        function obj = CalculateExtrinsics(obj, wld_points, add_noise_bool)
             
-            obj.cam_points = cam_points;
+            obj.wld_points = wld_points;
             
-            obj.wld_points = obj.uvToXYZwolrd(cam_points);
+            obj.cam_points = (obj.proj_matrix*obj.wld_points')';
+            obj.cam_points_prior_noise = obj.cam_points;
             
+            snr = 10;
+            if(add_noise_bool)
+                 obj.cam_points = [awgn(obj.cam_points(:, 1:2), snr) obj.cam_points(:, 3:4)];
+            end
+                        
             obj = obj.constructPmatrix();
             
-        end
-        
-        function xyz_points = uvToXYZwolrd(obj, uv_points)
-            
-            uv_points = [uv_points ones(size(uv_points, 1),1)];
-            
-            xyz_points = (inv(obj.proj_matrix) *  uv_points')'; 
-            xyz_points = xyz_points(:, 1:3);
-            
-            for i=1:1:size(uv_points,1)
-               fprintf('uv  : %3.4f, %3.4f, %3.4f \n', uv_points(i, 1), uv_points(i, 2), uv_points(i, 3)); 
-               fprintf('xyz : %3.4f, %3.4f, %3.4f \n', xyz_points(i, 1), xyz_points(i, 2), xyz_points(i, 3)); 
-            end
-                
-            
+            obj = obj.getRotAndTfromPmatrix();
             
         end
         
-        function obj = addGentry(obj, xyz_world, uv_cam)
+        function obj = constructGmatrix(obj, cam_points, wld_points)
             
-            u_cam = uv_cam(1) / uv_cam(3);
-            v_cam = uv_cam(2) / uv_cam(3);
-            
-            Gentry = [xyz_world(1), xyz_world(2), xyz_world(3), 1, ...
-                0, 0, 0, 0, ...
-                -u_cam*xyz_world(1), -u_cam*xyz_world(2), -u_cam*xyz_world(3), -u_cam; ...
-                0, 0, 0, 0, ...
-                xyz_world(1), xyz_world(2), xyz_world(3), 1, ...
-                -v_cam*xyz_world(1), -v_cam*xyz_world(2), -v_cam*xyz_world(3), -v_cam];
-            
-            
-            if(size(obj.G_matrix,1) ==0)
-                obj.G_matrix = Gentry;
-            else
-                obj.G_matrix = [obj.G_matrix; Gentry];
+            if(isempty(cam_points) & isempty(wld_points))
+                cam_points = obj.cam_points;
+                wld_points = obj.wld_points;
             end
+            
+            % G matrix
+            G_matrix = [];
+            for i=1:size(cam_points, 1)
+                uv_cam = cam_points(i,:);
+                xyz_world = wld_points(i,:);
+
+                u_cam = uv_cam(1) / uv_cam(3);
+                v_cam = uv_cam(2) / uv_cam(3);
+
+                Gentry = [xyz_world(1), xyz_world(2), xyz_world(3), 1, ...
+                    0, 0, 0, 0, ...
+                    -u_cam*xyz_world(1), -u_cam*xyz_world(2), -u_cam*xyz_world(3), -u_cam; ...
+                    0, 0, 0, 0, ...
+                    xyz_world(1), xyz_world(2), xyz_world(3), 1, ...
+                    -v_cam*xyz_world(1), -v_cam*xyz_world(2), -v_cam*xyz_world(3), -v_cam];
+
+                G_matrix = [G_matrix; Gentry];
+            end
+            
+            obj.G_matrix = G_matrix;
         end
         
         function obj = constructPmatrix(obj)
             
-            % create G matrix
-            for i=1:size(obj.wld_points,1)
-                obj= obj.addGentry(obj.wld_points(i,:), obj.cam_points(i, :));
-            end
             
-            % compute P matrix : the eigenvector of GtG with smallest
-            % eigenvalue
-            [U, S, V] = svd(obj.G_matrix);
-            eigenv_gtg = V(:, end);
-                    
-            obj.proj_matrix_computed = [ eigenv_gtg(1) eigenv_gtg(2) eigenv_gtg(3) eigenv_gtg(4) ; ...
-                            eigenv_gtg(5) eigenv_gtg(6) eigenv_gtg(7) eigenv_gtg(8) ; ...
-                            eigenv_gtg(9) eigenv_gtg(10) eigenv_gtg(11) eigenv_gtg(12) ; ...
-                            0                  0                  0                  1                  ];
-            
+                obj = obj.constructGmatrix([], []);
+                % compute P matrix : the eigenvector of GtG with smallest
+                % eigenvalue
+                [U, S, V] = svd(obj.G_matrix);
+                eigenv_gtg = V(:, end);
+
+                pp = [ eigenv_gtg(1) eigenv_gtg(2) eigenv_gtg(3) eigenv_gtg(4) ; ...
+                                eigenv_gtg(5) eigenv_gtg(6) eigenv_gtg(7) eigenv_gtg(8) ; ...
+                                eigenv_gtg(9) eigenv_gtg(10) eigenv_gtg(11) eigenv_gtg(12) ; ...
+                                0                  0                  0                  1                  ];
+
+                pp = pp./(sqrt(pp(3,1)^2+pp(3,2)^2+pp(3,3)^2)) ;
+                
+                obj.proj_matrix_computed = pp;
         end
         
         function obj = getRotAndTfromPmatrix(obj)
             
-            m = obj.proj_matrix_computed;
-            r = zeros(3,3);
-            t = zeros(3,1); 
-            a = eye(3,3);
+            pp = obj.proj_matrix_computed;
 
-            gamma = sqrt(m(3,1)^2 + m(3,2)^2 + m(3,3)^2)
+            B = pp(1:3, 1:3); 
+            b = pp(1:3, 4); 
 
-            B = m(1:3, 1:3); 
-            B = B/gamma;
-            b = m(1:3, 4); 
+            %             k = B*B';
+            %             
+            %             %u0
+            %             a(1,3) = k(1,3); 
+            %             %v0
+            %             a(2,3) = k(2,3);
+            %             %beta 
+            %             a(2,2) = sqrt(k(2,2)-a(2,3)^2);
+            %             %alpha
+            %             a(1,1) = sqrt(k(1,1)-a(1,3)^2);
+            % 
+            %             r = inv(a) * B 
+            %             [U, ~, V] = svd(r);
+            %             d = sign(det(V*U'));
+            %             r = [1 0 0; 0 1 0; 0 0 d]*r;
+            % 
+            %             t = inv(a) * b
+            %             
+            %             intr = obj.intrinsic_camera_matrix(1:3, 1:3);
 
-            k = B*B';
-            k2 = c.intrinsic_camera_matrix* c.intrinsic_camera_matrix';
+            r = inv(obj.intrinsic_camera_matrix(1:3, 1:3)) * B;
+            t = inv(obj.intrinsic_camera_matrix(1:3, 1:3)) * b;
             
-            %u0
-            a(1,3) = k(1,3); 
-            %v0
-            a(2,3) = k(2,3);
-            %beta 
-            a(2,2) = sqrt(k(2,2)-a(2,3)^2);
-            %alpha
-            a(1,1) = sqrt(k(1,1)-a(1,3)^2);
-            a
+            if(round(det(r)) == -1)
+                [U, ~, V] = svd(r);
+                d = sign(det(V*U'));
+                r = -r;
+                t = -t;
+            end
 
-            r = inv(a) * B 
-            [U, ~, V] = svd(r);
-            d = sign(det(V*U'));
-            r = [1 0 0; 0 1 0; 0 0 d]*r;
-
-            t = inv(a) * b
-            
-            intr = c.intrinsic_camera_matrix(1:3, 1:3);
-            t2 = inv(intr) * b
-                     
-            
-            obj.R_noint = r;
-            obj.t_noint = t;
+            obj.R_ext = r;
+            obj.t_ext = t;
             
 
         end
