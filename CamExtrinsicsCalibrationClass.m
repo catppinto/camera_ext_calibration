@@ -48,7 +48,7 @@ classdef CamExtrinsicsCalibrationClass
             
             snr = 10;
             if(add_noise_bool)
-                 obj.cam_points = [awgn(obj.cam_points(:, 1:2), snr) obj.cam_points(:, 3:4)];
+                 obj.cam_points = [awgn(obj.cam_points(:, 1:3), snr) obj.cam_points(:, 4)];
             end
                         
             obj = obj.constructPmatrix();

@@ -2,6 +2,7 @@
 %%% o erro. Estou a usar os valores da camera de de u,v,w qd so devia ser
 %%% preciso u,v. Isto esta a ocorrer na funcao  computeReprojectionError.
 %%% Deve-se dividir por w? Verificar isto ... 
+%%% TODO : testar com rand para o barulho
 
 
 clc
