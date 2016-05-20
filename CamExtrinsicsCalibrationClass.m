@@ -46,11 +46,23 @@ classdef CamExtrinsicsCalibrationClass
             obj.cam_points = (obj.proj_matrix*obj.wld_points')';
             obj.cam_points_prior_noise = obj.cam_points;
             
-            snr = 10;
+            snr = 70;
             if(add_noise_bool)
                  obj.cam_points = [awgn(obj.cam_points(:, 1:3), snr) obj.cam_points(:, 4)];
             end
                         
+            obj = obj.constructPmatrix();
+            
+            obj = obj.getRotAndTfromPmatrix();
+            
+        end
+        
+        function obj = CalculateExtrinsics_wldcampoints(obj, wld_points, cam_points)
+            
+            obj.wld_points = wld_points;
+            
+            obj.cam_points = cam_points;
+                         
             obj = obj.constructPmatrix();
             
             obj = obj.getRotAndTfromPmatrix();
