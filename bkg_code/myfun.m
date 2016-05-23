@@ -22,7 +22,7 @@ F = [up; vp];
 
 if nargout > 1   % two output arguments
     wx = x(1); wy = x(2); wz = x(3); tx = x(4); ty = x(5); tz = x(6);
-    au = A(1,1)s
+    au = A(1,1); av = A(2,2); u0 = A(1,3); v0 = A(2,3);
  
 	for i= 1:size(xdata, 2)
         X = xdata(1,i); 

@@ -2,6 +2,8 @@
 clc
 clear 
 
+addpath(genpath('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/matlab_code/bkg_code'))
+
 %% choose type of points 
 use_random_points = false;
 
