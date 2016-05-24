@@ -1,0 +1,44 @@
+Here plane model
+Filtered Point cloud has: 109259 data points.
+[ INFO] [1464102969.597683496]: after plane extraction ... 
+Model Coefs : 
+header: 
+seq: 33347 stamp: 1463779998130384 frame_id: /head/kinect2_rgb_optical_frame
+values[]
+  values[0]:   -0.000922655
+  values[1]:   -0.863758
+  values[2]:   -0.503906
+  values[3]:   0.549969
+
+in cloud_cb
+Filtered Point cloud has: 234382 data points.
+[ INFO] [1464102969.617373515]: Updated processed cloud
+[ INFO] [1464102969.617411922]: Computing normals .... 
+[ INFO] [1464102971.232106036]: Extracting from model .... 
+Here plane model
+Filtered Point cloud has: 107699 data points.
+[ INFO] [1464102972.044641289]: after plane extraction ... 
+Model Coefs : 
+header: 
+seq: 33439 stamp: 1463780001196426 frame_id: /head/kinect2_rgb_optical_frame
+values[]
+  values[0]:   -0.000139518
+  values[1]:   -0.863464
+  values[2]:   -0.50441
+  values[3]:   0.550648
+
+in cloud_cb
+Filtered Point cloud has: 235346 data points.
+[ INFO] [1464102972.429586066]: Updated processed cloud
+[ INFO] [1464102972.429627621]: Computing normals .... 
+^CHere plane model
+Filtered Point cloud has: 107452 data points.
+Model Coefs : 
+header: 
+seq: 33530 stamp: 1463780004230568 frame_id: /head/kinect2_rgb_optical_frame
+values[]
+  values[0]:   -0.00080255
+  values[1]:   -0.863825
+  values[2]:   -0.503791
+  values[3]:   0.550167
+
