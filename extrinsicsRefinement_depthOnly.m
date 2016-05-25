@@ -4,8 +4,8 @@
 
 load HERB_projectionData.mat
 
-camera_size = [640, 480]
-plane_coeffs = [-0.00080255,  -0.863825,  -0.503791,  0.550167]
+camera_size = [640, 480];
+plane_coeffs = [-0.00080255,  -0.863825,  -0.503791,  0.550167];
 
 tag_cam = [423   354     1];
 
@@ -15,8 +15,8 @@ tag_world_ori = [ -0.000611770725047 0.85704194419 -0.515219139985 0.00528861317
 %% 
 addpath('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/matlab_code/matpcl')
 
-tbl_cam_xyz = loadpcd('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/pcd_files/planecloud_1.pcd');
-tbl_cam_xyz = tbl_cam_xyz';
+% tbl_cam_xyz = loadpcd('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/pcd_files/planecloud_1.pcd');
+% tbl_cam_xyz = tbl_cam_xyz';
 
  a =plane_coeffs(1) ;
  b =plane_coeffs(2) ;
@@ -47,23 +47,23 @@ tbl_cam_xyz = tbl_cam_xyz';
   R(:, 2) = y; 	
   R(:, 3) = z; 	
     
-tbl_cam_xyz = [tbl_cam_xyz ones(size(tbl_cam_xyz,1), 1)];
+% tbl_cam_xyz = [tbl_cam_xyz ones(size(tbl_cam_xyz,1), 1)];
     
-  %% convert to camera points
-  
-  tbl_cam_uv = (A * tbl_cam_xyz')';
-  tbl_cam_uv = [tbl_cam_uv(:,1)./tbl_cam_uv(:,3) tbl_cam_uv(:,2)./tbl_cam_uv(:,3) ones(size(tbl_cam_uv,1), 1)];
-  
-    %% convert to world points 
-  
-  T = [R t; 0 0 0 1];
-  tabl_xyz_world = (T * tbl_cam_xyz')';
-  
-  
-  %%
-  
- rgb_img = imread('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/color/frame0000.jpg');
-imshow(rgb_img)
-
- dpt_img = imread('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/depth/frame0000.jpg');
-figure;imshow(dpt_img, [])
+%   %% convert to camera points
+%   
+%   tbl_cam_uv = (A * tbl_cam_xyz')';
+%   tbl_cam_uv = [tbl_cam_uv(:,1)./tbl_cam_uv(:,3) tbl_cam_uv(:,2)./tbl_cam_uv(:,3) ones(size(tbl_cam_uv,1), 1)];
+%   
+%     %% convert to world points 
+%   
+%   T = [R t; 0 0 0 1];
+%   tabl_xyz_world = (T * tbl_cam_xyz')';
+%   
+%   
+%   %%
+%   
+%  rgb_img = imread('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/color/frame0000.jpg');
+% imshow(rgb_img)
+% 
+%  dpt_img = imread('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/dataFrom20160520_173121bag/depth/frame0000.jpg');
+% figure;imshow(dpt_img, [])
