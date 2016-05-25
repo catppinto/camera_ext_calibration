@@ -4,6 +4,7 @@
 %%% Deve-se dividir por w? Verificar isto ... 
 %%% TODO : testar com rand para o barulho
 
+addpath('bkg_code')
 
 clc
 clear 
@@ -14,12 +15,15 @@ c = CamExtrinsicsCalibrationClass();
 n = 100;
 wx = 0 + (2-0).*rand(n,1); 
 wy = 0 + (2-0).*rand(n,1); 
-wz = 0 + (2-0).*rand(n,1);
+
+min_z = 0.99999999;
+max_z = 1;
+wz = min_z + (max_z-min_z).*rand(n,1); %ones(n,1) * 0.9161 ;
 
 wld_points = [wx wy wz ones(n, 1)];
 
 %%
-c = c.CalculateExtrinsics(wld_points, true);
+c = c.CalculateExtrinsics(wld_points, false);
 
 
 %% Error calculation 
