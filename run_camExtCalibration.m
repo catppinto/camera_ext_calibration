@@ -9,7 +9,6 @@ addpath('bkg_code')
 clc
 clear 
 
-
 c = CamExtrinsicsCalibrationClass();
 
 n = 100;
@@ -23,7 +22,7 @@ wz = min_z + (max_z-min_z).*rand(n,1);
 wld_points = [wx wy wz ones(n, 1)];
 
 %%
-c = c.CalculateExtrinsics(wld_points, true);
+c = c.CalculateExtrinsics(wld_points, false);
 
 %% Error calculation 
 

@@ -17,6 +17,13 @@ if(use_random_points)
 else
     [cam_points wld_points]= getDatafrom20160520();
     
+    n = size(wld_points, 1);
+    max_z = 0.93;
+    min_z = 0.90;
+    wz = min_z + (max_z-min_z).*rand(n,1);
+    
+    wld_points(:, 3) = wz;
+    
 end
 
 %% calculte extrinsics : first step

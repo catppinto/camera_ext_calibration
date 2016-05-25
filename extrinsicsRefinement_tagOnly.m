@@ -7,17 +7,25 @@ load HERB_projectionData; %% A, K, P
 
 load HERB_tableData;
 
-%%
+%% LOADING DATA
 
+marker_uv = tags_file1(1).cam_middlep;
 marker_wld_q = tags_file1(1).wld;
-marker_w_rot = quatToRotationMatrix(marker_wld_q(4:7))
+marker_w_rot = quatToRotationMatrix(marker_wld_q(4:7));
 marker_w_t = marker_wld_q(1:3)';
 marker_w = [marker_w_rot marker_w_t; 0 0 0 1];
 
-%expected marker 
+%% obs marker + exp marker
+% obs marker : in optimization function
+% expected marker : 
 
-table_pose = K * marker_w * tb_kinbody_offset;
-r_ = atan2(table_pose(1,1), table_pose(2,1));
+% gilwoo : 
+%table_pose = K * marker_w * tb_kinbody_offset;
+%r_ = atan2(table_pose(1,1), table_pose(2,1));
+
+tag_x = marker_w(1,4); 
+tag_y = marker_w(2,4); 
+r_ = atan2(marker_w(1,1), marker_w(2,1));
 
 %% convert the 3x3 rotation matrix into 3-vector w=[wx wy wz] of the Rodigrues representation
 R = K(1:3, 1:3);
@@ -27,11 +35,11 @@ wx=w(1);
 wy=w(2);
 wz=w(3);
 
-x0 =[wx, wy, wz, K(1,4), K(2,4), K(3,4), r_, table_pose(1), table_pose(2) ];
+x0 =[wx, wy, wz, K(1,4), K(2,4), K(3,4), r_, tag_x, tag_y];
 
 %% optimization 
 
-options = optimoptions('fmincon','Display','iter','Algorithm','sqp');
+options = optimoptions('fmincon','Display','iter');
 x = fmincon(@find_expectedmarker_projection,x0,[],[]);
 
 % get refined extrinsics
