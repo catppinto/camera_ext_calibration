@@ -75,7 +75,7 @@ F = norm(observed_proj_marker_uv - expected_proj_marker_uv);
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
 lb = [-Inf, -Inf, -Inf, -5, -5, -5, -Inf, -5, -5];
 ub = [Inf, Inf, Inf, 5, 5, 5, Inf, 5, 5];
-[x, fval, exittag] = fmincon(@find_expectedmarker_projection,x0,[],[],[],[],lb,ub,[], options);
+[x, fval, exittag] = fmincon(@find_expectedonetagpoint_projection,x0,[],[],[],[],lb,ub,[], options);
 
 
 % get refined extrinsics

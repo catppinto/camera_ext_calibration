@@ -1,4 +1,4 @@
-function [F] = find_expectedmarker_projection(x)
+function [F] = find_expectedonetagpoint_projection(x)
 
 %% load data
 load test1_data.mat;
