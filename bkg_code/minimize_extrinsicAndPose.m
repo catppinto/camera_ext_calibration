@@ -8,6 +8,12 @@ load HERB_projectionData; %% A, K, P
 
 load HERB_tableData;
 
+%% optimization needed variables
+t_ext0 = K_wc(1:3, 4);
+t_tagxy0 = tagcorners.xyz_w(1:2);
+alpha = 0.6; 
+beta = 0.6;
+
 %% Observed marker
 
 observed_uv_c1 = tagcorners.uv.c1'; 
@@ -23,18 +29,18 @@ t_wc=[x(4);x(5);x(6)];
 KK_wc = [R_wc t_wc ; 0 0 0 1];
 
 tag_theta = x(7);
-tag_x = x(8);
-tag_y = x(9);
+tag_xy = x(8:9);
+
 
 %% Expected world coordinates calculus 
 
 expected_rotation = [   cos(tag_theta) -sin(tag_theta)  0 ; ...
                         sin(tag_theta)  cos(tag_theta)  0 ; ...
                         0                            0  1];
-expected_w_c1 = [tag_x+halftagsize, tag_y-halftagsize, tb_height]';
-expected_w_c2 = [tag_x+halftagsize, tag_y+halftagsize, tb_height]';
-expected_w_c3 = [tag_x-halftagsize, tag_y+halftagsize, tb_height]';
-expected_w_c4 = [tag_x-halftagsize, tag_y-halftagsize, tb_height]';
+expected_w_c1 = [tag_xy(1)+halftagsize, tag_xy(2)-halftagsize, tb_height]';
+expected_w_c2 = [tag_xy(1)+halftagsize, tag_xy(2)+halftagsize, tb_height]';
+expected_w_c3 = [tag_xy(1)-halftagsize, tag_xy(2)+halftagsize, tb_height]';
+expected_w_c4 = [tag_xy(1)-halftagsize, tag_xy(2)-halftagsize, tb_height]';
 
 expected_c1 = [ expected_rotation expected_w_c1; 0 0 0 1];
 expected_c2 = [ expected_rotation expected_w_c2; 0 0 0 1];
@@ -71,7 +77,14 @@ norm_c2 = norm(observed_uv_c2 - expected_uv_c2);
 norm_c3 = norm(observed_uv_c3 - expected_uv_c3);
 norm_c4 = norm(observed_uv_c4 - expected_uv_c4);
 
-F = norm_c1 + norm_c2 + norm_c3 + norm_c4 ;
+%%
+
+norm_tExt = norm(t_ext0 -t_wc);
+norm_xytag = norm(t_tagxy0 - tag_xy');
+
+%% cost function 
+
+F = norm_c1 + norm_c2 + norm_c3 + norm_c4 + alpha*norm_tExt + beta*norm_xytag;
 
 
 
