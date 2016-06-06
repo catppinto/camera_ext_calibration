@@ -62,7 +62,21 @@ classdef CamExtrinsicsCalibrationClass
             obj.wld_points = wld_points;
             
             obj.cam_points = cam_points;
-                         
+                                     
+            obj = obj.constructPmatrix();
+            
+            obj = obj.getRotAndTfromPmatrix();
+            
+        end
+        
+        function obj = CalculateExtrinsics_wldcampointsIntrinsics(obj, wld_points, cam_points, intrinsics)
+            
+            obj.wld_points = wld_points;
+            
+            obj.cam_points = cam_points;
+            
+            obj.intrinsic_camera_matrix = intrinsics;
+                                     
             obj = obj.constructPmatrix();
             
             obj = obj.getRotAndTfromPmatrix();
