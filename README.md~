@@ -14,6 +14,3 @@ the class , see line 50 (adding noise) -> need to choose a good way to do this.
 Problems : 
 How, where to add the noise for testing. 
 Should use another optimizer ? 
-
--> Extrinsic refinement : tag corners 
-last edition, using fmincon and the cost function depicted in my thesis

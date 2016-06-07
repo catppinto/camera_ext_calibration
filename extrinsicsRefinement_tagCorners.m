@@ -61,25 +61,38 @@ expected_c4 = [ expected_rotation expected_w_c4; 0 0 0 1];
 expected_c1_c = inv(KK_wc) * expected_c1;
 expected_c1_Xc = expected_c1_c(:, 4);
 expected_uv_c1 = A * expected_c1_Xc;
-expected_uv_c1 = [expected_uv_c1(1)/expected_uv_c1(3), expected_uv_c1(2)/expected_uv_c1(3) 1]'
+expected_uv_c1 = [expected_uv_c1(1)/expected_uv_c1(3), expected_uv_c1(2)/expected_uv_c1(3) 1]';
 
 % corner 2
 expected_c2_c = inv(KK_wc) * expected_c2;
 expected_c2_Xc = expected_c2_c(:, 4);
 expected_uv_c2 = A * expected_c2_Xc;
-expected_uv_c2 = [expected_uv_c2(1)/expected_uv_c2(3), expected_uv_c2(2)/expected_uv_c2(3) 1]'
+expected_uv_c2 = [expected_uv_c2(1)/expected_uv_c2(3), expected_uv_c2(2)/expected_uv_c2(3) 1]';
 
 % corner 3 
 expected_c3_c = inv(KK_wc) * expected_c3;
 expected_c3_Xc = expected_c3_c(:, 4);
 expected_uv_c3 = A * expected_c3_Xc;
-expected_uv_c3 = [expected_uv_c3(1)/expected_uv_c3(3), expected_uv_c3(2)/expected_uv_c3(3) 1]'
+expected_uv_c3 = [expected_uv_c3(1)/expected_uv_c3(3), expected_uv_c3(2)/expected_uv_c3(3) 1]';
 
 % corner 4 
 expected_c4_c = inv(KK_wc) * expected_c4;
 expected_c4_Xc = expected_c4_c(:, 4);
 expected_uv_c4 = A * expected_c4_Xc;
-expected_uv_c4 = [expected_uv_c4(1)/expected_uv_c4(3), expected_uv_c4(2)/expected_uv_c4(3) 1]'
+expected_uv_c4 = [expected_uv_c4(1)/expected_uv_c4(3), expected_uv_c4(2)/expected_uv_c4(3) 1]';
+
+observed_uv_c1
+expected_uv_c1
+
+observed_uv_c2
+expected_uv_c2
+
+observed_uv_c3
+expected_uv_c3
+
+observed_uv_c4
+expected_uv_c4
+
 
 % cost function 
 norm_c1 = norm(observed_uv_c1 - expected_uv_c1);
