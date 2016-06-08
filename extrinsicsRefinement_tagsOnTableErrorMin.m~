@@ -1,0 +1,13 @@
+addpath(strcat(pwd, '/bkg_code'))
+addpath(strcat(pwd, '/dataFromTableRotationTest'))
+
+
+clear
+clc
+
+%% LOADING DATA
+
+[] = load('test1_data.mat') ;
+
+%%  find x
+
