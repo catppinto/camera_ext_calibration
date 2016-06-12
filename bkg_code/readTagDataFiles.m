@@ -1,7 +1,11 @@
-addpath('/home/cat/CMU_TESTS_DATA/ADAtags_data')
+%addpath('/home/cat/CMU_TESTS_DATA/ADAtags_data')
+%fid = fopen('adatags_08062016.txt','r')
+
+path = '/home/apirespi/cat_workspace/src/tabletop_perception_tools/pcd_test_files/ADA_sameRotationTags_11062016';
+addpath(path)
+fid = fopen('adatags_11062016.txt','r')
 
 
-fid = fopen('adatags_08062016.txt','r')
 C = textscan(fid, '%s','Delimiter','');
 fclose(fid)
 C = C{:};
@@ -37,4 +41,4 @@ end
 tags_train = tag(1:round(i/2), :); 
 tags_test = tag(round(i/2+1):end, :);
 
-save('/home/cat/CMU_TESTS_DATA/ADAtags_data/ADAtags_08062016.mat', 'tags_train', 'tags_test')
+save([path,'/ADAtags_08062016.mat'], 'tags_train', 'tags_test')
