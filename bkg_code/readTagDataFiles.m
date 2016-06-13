@@ -41,4 +41,4 @@ end
 tags_train = tag(1:round(i/2), :); 
 tags_test = tag(round(i/2+1):end, :);
 
-save([path,'/ADAtags_08062016.mat'], 'tags_train', 'tags_test')
+save([path,'/ADAtags_11062016.mat'], 'tags_train', 'tags_test')
