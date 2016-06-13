@@ -2,7 +2,9 @@ function [F] = minimize_tableTagErrorADA(x, tags_train, corners, K_ext0)
 
 %% get projection data from ADA (init estimate) 
 load ADA_Data; 
-load('ADAtags_13062016_trueSizeTag.mat')
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'], 'T_rb2e')
+
 
 zhat_table = [0 0 1]';
 z_table = tag_height;   
@@ -17,7 +19,6 @@ A = [567.7969970703125, 0.0, 319.5, 0.0; ...
      0.0, 0.0, 1.0, 0.0;...
      0.0, 0.0, 0.0, 1.0];
  
-tag_rotation_offset2 = [-0 -1 0 0; -1 0 0 0 ; 0 0 -1 0 ; 0 0 0 1];
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 %% Conversion to R,t extrinsiccs 
 
@@ -122,5 +123,7 @@ reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
 
 %% cost function 
 F = sum(psi*norm_z)+ psi_neg*sum(negativeZ) + sum(alpha*theta_error); % + sum(gamma.*norm_ext); % + delta*reprojection_error; 
+% delta = 1;
+% F = sum(psi*norm_z)+ psi_neg*sum(negativeZ) + sum(alpha*theta_error) + delta*reprojection_error; 
 
 

@@ -6,24 +6,23 @@
 
 clear
 clc
- 
-%addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/bkg_code')
-addpath('/homes/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/bkg_code')
-
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+addpath([path, 'bkg_code'])
+%addpath('/homes/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/bkg_code')
 
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 %% TRAINING
 
 %% LOADING DATA
 load ADA_Data; %% A, K, P
-load('dataFromADA/ADAtags_13062016_trueSizeTag.mat')
+load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'])
 corners = [];
 
 %%  find x
 
 K_wc = T_e2c;
 
-w=rodrigues(K_wc(1:3, 1:3))
+w=rodrigues(K_wc(1:3, 1:3));
 wx=w(1);
 wy=w(2);
 wz=w(3);
@@ -93,8 +92,8 @@ for i=1:size(tags_train.pose,1)
    
 end
 
-% % corners
-% 
+% %% corners
+% t_w_estimates = t_w_estimatesr;
 % tag_size = 0.06;
 % ts = tag_size/2;
 % for i=1:size(t_w_estimates,3)
@@ -137,10 +136,10 @@ end
 % end
 % 
 % for n =1:size(t_w_estimates,3)
-%     norm_c1(n) = norm(c1_est(n, :) - tags_train.corners.c3(n, :));
-%     norm_c2(n) = norm(c2_est(n, :) - tags_train.corners.c4(n, :));
-%     norm_c3(n) = norm(c3_est(n, :) - tags_train.corners.c1(n, :));
-%     norm_c4(n) = norm(c4_est(n, :) - tags_train.corners.c2(n, :));
+%     norm_c1(n) = norm(c1_est(n, :) - corners.c3(n, :));
+%     norm_c2(n) = norm(c2_est(n, :) - corners.c4(n, :));
+%     norm_c3(n) = norm(c3_est(n, :) - corners.c1(n, :));
+%     norm_c4(n) = norm(c4_est(n, :) - corners.c2(n, :));
 % end
 % 
 % reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
