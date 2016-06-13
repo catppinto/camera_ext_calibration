@@ -1,9 +1,12 @@
+clear 
+clc
+
 %addpath('/home/cat/CMU_TESTS_DATA/ADAtags_data')
 %fid = fopen('adatags_08062016.txt','r')
 
-path = '/home/apirespi/cat_workspace/src/tabletop_perception_tools/pcd_test_files/ADA_sameRotationTags_11062016';
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/dataFromADA/';
 addpath(path)
-fid = fopen('adatags_11062016.txt','r')
+fid = fopen('adatags_13062016.txt','r')
 
 
 C = textscan(fid, '%s','Delimiter','');
@@ -38,7 +41,47 @@ for i = 1:length(index)
     
 end  
 
-tags_train = tag(1:round(i/2), :); 
-tags_test = tag(round(i/2+1):end, :);
+index1 = strfind(C,'corners2d[]');
+index1 = find(~cellfun(@isempty,index1));
 
-save([path,'/ADAtags_11062016.mat'], 'tags_train', 'tags_test')
+for i = 1:length(index1)
+    
+    corner1_x = C{index1(i)+2};
+    corner1_x = str2double(corner1_x(regexp(corner1_x,[': '])+1:end));
+    corner1_y = C{index1(i)+3};
+    corner1_y = str2double(corner1_y(regexp(corner1_y,[': '])+1:end));
+    
+    corner2_x = C{index1(i)+6};
+    corner2_x = str2double(corner2_x(regexp(corner2_x,[': '])+1:end));
+    corner2_y = C{index1(i)+7};
+    corner2_y = str2double(corner2_y(regexp(corner2_y,[': '])+1:end));
+    
+    corner3_x = C{index1(i)+10};
+    corner3_x = str2double(corner3_x(regexp(corner3_x,[': '])+1:end));
+    corner3_y = C{index1(i)+11};
+    corner3_y = str2double(corner3_y(regexp(corner3_y,[': '])+1:end));
+    
+    corner4_x = C{index1(i)+14};
+    corner4_x = str2double(corner4_x(regexp(corner4_x,[': '])+1:end));
+    corner4_y = C{index1(i)+15};
+    corner4_y = str2double(corner4_y(regexp(corner4_y,[': '])+1:end));
+        
+    corners_1(i, :) = [corner1_x corner1_y 1.0];
+    corners_2(i, :) = [corner2_x corner2_y 1.0];
+    corners_3(i, :) = [corner3_x corner3_y 1.0];
+    corners_4(i, :) = [corner4_x corner4_y 1.0];  
+end  
+
+numtags = length(index);
+tags_train.pose = tag(1:round(numtags/2), :); 
+tags_test.pose = tag(round(numtags/2+1):end, :);
+tags_train.corners.c1 = corners_1(1:round(numtags/2), :);
+tags_train.corners.c2 = corners_2(1:round(numtags/2), :);
+tags_train.corners.c3 = corners_3(1:round(numtags/2), :);
+tags_train.corners.c4 = corners_4(1:round(numtags/2), :);
+tags_test.corners.c1 = corners_1(round(numtags/2+1):end, :);
+tags_test.corners.c2 = corners_2(round(numtags/2+1):end, :);
+tags_test.corners.c3 = corners_3(round(numtags/2+1):end, :);
+tags_test.corners.c4 = corners_4(round(numtags/2+1):end, :);
+
+save([path,'/ADAtags_13062016.mat'], 'tags_train', 'tags_test')

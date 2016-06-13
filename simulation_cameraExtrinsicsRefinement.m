@@ -80,7 +80,7 @@ end
 % (3) Add Gaussian noise (statistically independent and addictive noise) to
 % data
 
-ratio = 0.05;
+ratio = 0.1;
 a = rodrigues(T_w2c(1:3, 1:3));
 N = randn(size(a));
 N = N*ratio;
@@ -146,7 +146,9 @@ for i=1:size(T_c_tag,3)
         
     t_c = T_c_tag(:, :, i);
     t_w_estimated = KK * t_c;
+    
     t_w_real = T_w2c * t_c;
+    t_w_reals(:, :, i) = t_w_real;
     error_xyz(i) = sqrt(sum( (t_w_estimated(1:3, 4) - t_w_real(1:3, 4)).^2));
     
     error_rot(i) = sqrt(sum( (rodrigues(t_w_estimated(1:3, 1:3)) - rodrigues(t_w_real(1:3, 1:3)) ).^2));
@@ -154,3 +156,56 @@ for i=1:size(T_c_tag,3)
 end
 error_xyz
 sum(error_xyz)
+
+%% corners
+
+tag_size = 0.06;
+ts = tag_size/2;
+for i=1:size(t_w_reals,3)
+    t = t_w_reals(:, :, i);
+    corner1_est = t; corner1_est(1,4) = t(1,4)+ts; corner1_est(2,4) = t(2,4)+ts; 
+    corner2_est = t; corner2_est(1,4) = t(1,4)-ts; corner2_est(2,4) = t(2,4)+ts;
+    corner3_est = t; corner3_est(1,4) = t(1,4)-ts; corner3_est(2,4) = t(2,4)-ts;
+    corner4_est = t; corner4_est(1,4) = t(1,4)+ts; corner4_est(2,4) = t(2,4)-ts;
+    
+    T_w1(:, :, i) = corner1_est; 
+    T_w2(:, :, i) = corner2_est;
+    T_w3(:, :, i) = corner3_est;
+    T_w4(:, :, i) = corner4_est;
+end
+
+for n =1:size(t_w_reals,3)
+   T_c1(:, :, n) = inv(KK) * T_w1(:, :, n);
+   T_c2(:, :, n) = inv(KK) * T_w2(:, :, n);
+   T_c3(:, :, n) = inv(KK) * T_w3(:, :, n);
+   T_c4(:, :, n) = inv(KK) * T_w4(:, :, n);
+end
+        
+c1_est = []; c2_est= []; c3_est= []; c4_est= [];
+for n =1:size(t_w_reals,3)
+   tc_1 = T_c1(:, :, n) ;
+   corner1_est = A * tc_1(1:4, 4);
+   c1_est(n, :) = [corner1_est(1)/corner1_est(3) corner1_est(2)/corner1_est(3) 1];
+
+   tc_2 = T_c2(:, :, n) ;
+   corner2_est = A * tc_2(1:4, 4);
+   c2_est(n, :) = [corner2_est(1)/corner2_est(3) corner2_est(2)/corner2_est(3) 1];
+   
+   tc_3 = T_c3(:, :, n) ;
+   corner3_est = A * tc_3(1:4, 4);
+   c3_est(n, :) = [corner3_est(1)/corner3_est(3) corner3_est(2)/corner3_est(3) 1];
+   
+   tc_4 = T_c4(:, :, n) ;
+   corner4_est = A * tc_4(1:4, 4);
+   c4_est(n, :) = [corner4_est(1)/corner4_est(3) corner4_est(2)/corner4_est(3) 1];
+end
+
+for n =1:size(t_w_reals,3)
+    norm_c1(n) = norm(c1_est(n, :) - c1(n, :));
+    norm_c2(n) = norm(c2_est(n, :) - c2(n, :));
+    norm_c3(n) = norm(c3_est(n, :) - c3(n, :));
+    norm_c4(n) = norm(c4_est(n, :) - c4(n, :));
+end
+
+reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
+
