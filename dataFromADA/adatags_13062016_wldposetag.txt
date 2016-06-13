@@ -1,0 +1,256 @@
+header: 
+  seq: 0
+  stamp: 1465849016.591086415
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0146962
+    y: 0.0106843
+    z: 0.295885
+  orientation: 
+    x: 0.996048
+    y: 0.00842539
+    z: -0.0193574
+    w: 0.0862698
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 316.5
+    z: 1
+  corners2d[1]: 
+    x: 348.5
+    y: 319.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 204.5
+    z: 1
+  corners2d[3]: 
+    x: 236.5
+    y: 203.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849020.294084846
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0121108
+    y: 0.0126804
+    z: 0.263753
+  orientation: 
+    x: 0.980058
+    y: 0.0040132
+    z: -0.161494
+    w: -0.115716
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 316.5
+    z: 1
+  corners2d[1]: 
+    x: 365.5
+    y: 335.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 204.5
+    z: 1
+  corners2d[3]: 
+    x: 235.5
+    y: 204.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849021.489713732
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0149104
+    y: 0.0114655
+    z: 0.298659
+  orientation: 
+    x: 0.999161
+    y: 0.00762517
+    z: -0.00892604
+    w: 0.0392268
+corners2d[]
+  corners2d[0]: 
+    x: 232.5
+    y: 317.5
+    z: 1
+  corners2d[1]: 
+    x: 347.5
+    y: 319.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 205.5
+    z: 1
+  corners2d[3]: 
+    x: 235.5
+    y: 204.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849022.492426466
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0149893
+    y: 0.0107603
+    z: 0.294517
+  orientation: 
+    x: 0.996234
+    y: 0.00927034
+    z: -0.057593
+    w: 0.0641504
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 316.5
+    z: 1
+  corners2d[1]: 
+    x: 347.5
+    y: 320.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 203.5
+    z: 1
+  corners2d[3]: 
+    x: 236.5
+    y: 203.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849023.392216497
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0139073
+    y: 0.0102649
+    z: 0.29091
+  orientation: 
+    x: 0.994059
+    y: 0.00579265
+    z: 0.0708788
+    w: 0.0823989
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 318.5
+    z: 1
+  corners2d[1]: 
+    x: 350.5
+    y: 319.5
+    z: 1
+  corners2d[2]: 
+    x: 348.5
+    y: 203.5
+    z: 1
+  corners2d[3]: 
+    x: 235.5
+    y: 200.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849024.391916150
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0146524
+    y: 0.010823
+    z: 0.295439
+  orientation: 
+    x: 0.995869
+    y: 0.0103494
+    z: -0.0377274
+    w: 0.0819414
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 316.5
+    z: 1
+  corners2d[1]: 
+    x: 348.5
+    y: 320.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 204.5
+    z: 1
+  corners2d[3]: 
+    x: 237.5
+    y: 203.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849025.327054801
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0142727
+    y: 0.0109162
+    z: 0.295307
+  orientation: 
+    x: 0.997647
+    y: 0.00893392
+    z: -0.0178755
+    w: 0.0655876
+corners2d[]
+  corners2d[0]: 
+    x: 232.5
+    y: 317.5
+    z: 1
+  corners2d[1]: 
+    x: 349.5
+    y: 320.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 204.5
+    z: 1
+  corners2d[3]: 
+    x: 237.5
+    y: 202.5
+    z: 1
+ **************************************************** 
+header: 
+  seq: 0
+  stamp: 1465849026.428459376
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0150528
+    y: 0.0106713
+    z: 0.295379
+  orientation: 
+    x: 0.99724
+    y: 0.00750759
+    z: -0.0388569
+    w: 0.0628117
+corners2d[]
+  corners2d[0]: 
+    x: 231.5
+    y: 316.5
+    z: 1
+  corners2d[1]: 
+    x: 347.5
+    y: 319.5
+    z: 1
+  corners2d[2]: 
+    x: 349.5
+    y: 203.5
+    z: 1
+  corners2d[3]: 
+    x: 235.5
+    y: 203.5
+    z: 1
+ **************************************************** 

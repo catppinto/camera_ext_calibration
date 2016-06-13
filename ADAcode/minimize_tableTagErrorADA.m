@@ -2,7 +2,7 @@ function [F] = minimize_tableTagErrorADA(x, tags_train, corners, K_ext0)
 
 %% get projection data from ADA (init estimate) 
 load ADA_Data; 
-load('T_rb2e_13062016.mat')
+load('ADAtags_13062016_trueSizeTag.mat')
 
 zhat_table = [0 0 1]';
 z_table = tag_height;   

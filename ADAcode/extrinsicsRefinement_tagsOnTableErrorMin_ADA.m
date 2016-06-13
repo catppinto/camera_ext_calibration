@@ -7,15 +7,16 @@
 clear
 clc
  
-addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/bkg_code')
+%addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/bkg_code')
+addpath('/homes/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/bkg_code')
+
 
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 %% TRAINING
 
 %% LOADING DATA
 load ADA_Data; %% A, K, P
-load('dataFromADA/ADAtags_13062016.mat')
-load('T_rb2e_13062016.mat')
+load('dataFromADA/ADAtags_13062016_trueSizeTag.mat')
 corners = [];
 
 %%  find x

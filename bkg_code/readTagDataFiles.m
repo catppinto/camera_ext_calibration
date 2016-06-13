@@ -4,9 +4,9 @@ clc
 %addpath('/home/cat/CMU_TESTS_DATA/ADAtags_data')
 %fid = fopen('adatags_08062016.txt','r')
 
-path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/dataFromADA/';
+path = '/home/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/dataFromADA/';
 addpath(path)
-fid = fopen('adatags_13062016.txt','r')
+fid = fopen('adatags_13062016_trueSizeTag.txt','r')
 
 
 C = textscan(fid, '%s','Delimiter','');
@@ -84,4 +84,4 @@ tags_test.corners.c2 = corners_2(round(numtags/2+1):end, :);
 tags_test.corners.c3 = corners_3(round(numtags/2+1):end, :);
 tags_test.corners.c4 = corners_4(round(numtags/2+1):end, :);
 
-save([path,'/ADAtags_13062016.mat'], 'tags_train', 'tags_test')
+save([path,'/ADAtags_13062016_trueSizeTag.mat'], 'tags_train', 'tags_test')
