@@ -1,0 +1,125 @@
+header: 
+  seq: 0
+  stamp: 1465930284.345377773
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: 0.0436048
+    y: 0.058694
+    z: 0.411362
+  orientation: 
+    x: 0.991945
+    y: 0.0132921
+    z: -0.00453567
+    w: 0.125887
+corners2d[]
+  corners2d[0]: 
+    x: 325.5
+    y: 373.5
+    z: 1
+  corners2d[1]: 
+    x: 433.5
+    y: 374.5
+    z: 1
+  corners2d[2]: 
+    x: 432.5
+    y: 271.5
+    z: 1
+  corners2d[3]: 
+    x: 327.5
+    y: 267.5
+    z: 1
+header: 
+  seq: 0
+  stamp: 1465930284.345379251
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0530346
+    y: 0.0565893
+    z: 0.416345
+  orientation: 
+    x: 0.997519
+    y: 0.00941161
+    z: -0.0366736
+    w: 0.0593543
+corners2d[]
+  corners2d[0]: 
+    x: 193.5
+    y: 367.5
+    z: 1
+  corners2d[1]: 
+    x: 297.5
+    y: 371.5
+    z: 1
+  corners2d[2]: 
+    x: 300.5
+    y: 265.5
+    z: 1
+  corners2d[3]: 
+    x: 198.5
+    y: 264.5
+    z: 1
+header: 
+  seq: 0
+  stamp: 1465930284.345379894
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: 0.0353353
+    y: -0.0299369
+    z: 0.335553
+  orientation: 
+    x: 0.996966
+    y: 0.0024889
+    z: -0.0223887
+    w: 0.0745042
+corners2d[]
+  corners2d[0]: 
+    x: 328.5
+    y: 238.5
+    z: 1
+  corners2d[1]: 
+    x: 431.5
+    y: 239.5
+    z: 1
+  corners2d[2]: 
+    x: 429.5
+    y: 139.5
+    z: 1
+  corners2d[3]: 
+    x: 328.5
+    y: 140.5
+    z: 1
+header: 
+  seq: 0
+  stamp: 1465930284.345380500
+  frame_id: /openni_ir_optical_frame
+pose: 
+  position: 
+    x: -0.0508907
+    y: -0.0385549
+    z: 0.428907
+  orientation: 
+    x: 0.995656
+    y: 0.005297
+    z: -0.0163146
+    w: 0.0915113
+corners2d[]
+  corners2d[0]: 
+    x: 199.5
+    y: 237.5
+    z: 1
+  corners2d[1]: 
+    x: 301.5
+    y: 238.5
+    z: 1
+  corners2d[2]: 
+    x: 303.5
+    y: 140.5
+    z: 1
+  corners2d[3]: 
+    x: 204.5
+    y: 140.5
+    z: 1
+ **************************************************** 

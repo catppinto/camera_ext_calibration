@@ -6,7 +6,7 @@ clc
 
 path = '/home/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/dataFromADA/';
 addpath(path)
-fid = fopen('adatags_13062016_trueSizeTag.txt','r')
+fid = fopen('adatags_14062016_wldposetag.txt','r')
 
 
 C = textscan(fid, '%s','Delimiter','');
@@ -84,4 +84,4 @@ tags_test.corners.c2 = corners_2(round(numtags/2+1):end, :);
 tags_test.corners.c3 = corners_3(round(numtags/2+1):end, :);
 tags_test.corners.c4 = corners_4(round(numtags/2+1):end, :);
 
-save([path,'/ADAtags_13062016_trueSizeTag.mat'], 'tags_train', 'tags_test')
+save([path,'/ADAtags_14062016_wldPoseTag.mat'], 'tags_train', 'tags_test')

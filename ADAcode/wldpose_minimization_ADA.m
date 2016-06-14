@@ -1,17 +1,34 @@
-function F = wldpose_minimization_ADA(x, wld_pose, cam_pose, x0)
-alpha = 1;
-load ADA_Data;
+function F = wldpose_minimization_ADA(x, wld_pose, cam_pose, K_ec)
 
-k= T_e2c(1:3, 1:3);
-t_Est = [x(1); x(2) ; x(3)];
+%%
+alpha = 10;
+beta = [ 10 10 100]';
+load ADA_Data;
+path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+% path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+
+k= K_ec(1:3, 1:3);
+t_Est = [x(1); x(2); x(3)];
+% k = [k [t_Est; K_ec(3, 4)]; 0 0 0 1];
 k = [k t_Est; 0 0 0 1];
 
-wld_estimate = k*cam_pose; 
+t_w = T_tb2rb * T_rb2e * k*cam_pose; 
 
-error = sqrt((wld_pose(1) - wld_estimate(1))^2 + ...
-    (wld_pose(2) - wld_estimate(2))^2 + ...
-    (wld_pose(3) - wld_estimate(3))^2 );
-d = sqrt((t_Est(1) - x0(1))^2 + ...
-    (t_Est(2) - x0(2))^2 + ...
-    (t_Est(3) - x0(3))^2 );
-F = 10*error + alpha * d;
+if(size(wld_pose, 2) ==1 ) 
+    error = sqrt((wld_pose(1) - t_w(1))^2 + ...
+        (wld_pose(2) - t_w(2))^2 + ...
+        (wld_pose(3) - t_w(3))^2 );
+    d = sqrt((t_Est(1) - K_ec(1,4))^2 + ...
+        (t_Est(2) - K_ec(2,4))^2  + ...
+        (t_Est(3) - K_ec(3,4))^2 );
+    F = error + alpha * d;
+else
+    error = [sqrt( (wld_pose(1,:) - t_w(1, :)).^2) ; 
+             sqrt( (wld_pose(2, :) - t_w(2,:)).^2) ;
+             sqrt(  (wld_pose(3, :) - t_w(3, :)).^2)];
+    error = sum(error,2);
+    d = sqrt((t_Est(1) - K_ec(1,4))^2 + (t_Est(2) - K_ec(2,4))^2  + (t_Est(3) - K_ec(3,4))^2 );
+    F = sum(beta.*error) + alpha * d;
+    
+end
