@@ -1,21 +1,17 @@
 function [F, J] = myfun(x, xdata)
+ 
+load('DATA/FEUPdata.mat'); 
 
-A = [529.2945040622658, 0.0, 466.96044871160075, 0.0 ; ...
-    0.0, 531.2834529497384, 273.2593671723483 , 0.0 ; ...
-    0.0, 0.0, 1.0, 0.0;
-    0.0, 0.0, 0.0, 1.0];
+A = intrinsics;
 
 % convert the 3-vector [wx wy wz] of the Rodrigues representation
 % into the 3x3 rotation matrix
-theta2=x(1)^2+x(2)^2+x(3)^2;
-theta=sqrt(theta2);
-omega=[0 -x(3) x(2);
-    x(3) 0  -x(1);
-    -x(2) x(1) 0;];
-R = eye(3) + (sin(theta)/theta)*omega + ((1-cos(theta))/(theta^2))*(omega*omega);
+r = x(1:3);
+R = rodrigues(r);
 t=[x(4);x(5);x(6)];
 
-uv = A * [R t ; 0 0 0 1] * xdata;
+T_c2w = [R t ; 0 0 0 1] ; 
+uv = A *  T_c2w * xdata;
 up = uv(1,:)./uv(3,:);
 vp = uv(2,:)./uv(3,:);
 F = [up; vp];

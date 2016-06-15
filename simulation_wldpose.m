@@ -1,19 +1,15 @@
-function F = wldpose_minimization_ADA(x, wld_pose, cam_pose, K_ec)
+function F = simulation_wldpose(x, wld_pose, cam_pose, K_ec)
 
 %%
 alpha = 10;
 beta = [ 10 10 100]';
-load ADA_Data;
-% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
-path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
-load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
 
 k= K_ec(1:3, 1:3);
 t_Est = [x(1); x(2); x(3)];
 % k = [k [t_Est; K_ec(3, 4)]; 0 0 0 1];
 k = [k t_Est; 0 0 0 1];
 
-t_w = T_tb2rb * T_rb2e * k*cam_pose; 
+t_w = k*cam_pose; 
 
 if(size(wld_pose, 2) ==1 ) 
     error = sqrt((wld_pose(1) - t_w(1))^2 + ...

@@ -1,7 +1,7 @@
 clear
 clc
 path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
-path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
 addpath([path, 'bkg_code'])
 %addpath('/homes/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/bkg_code')
 
@@ -16,8 +16,8 @@ load ADA_Data; %% A, K, P
 load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
 %%  find x
 
-K_ec = [   0.9988    0.0305   -0.0385   -0.0472;
-    0.0390   -0.9686    0.2457    0.0501;
+K_ec = [   0.9988    0.0305   -0.0385   -0.0470;
+    0.0390   -0.9686    0.2457    0.0500;
    -0.0298   -0.2469   -0.9686   -0.0891;
          0         0         0    1.0000]
      
@@ -67,6 +67,12 @@ wld_pose
 [error_t_prioropt, overall_prior_opt ]= translationErrorBetweenPointsInWorld(wld_pose, t_w_prior_opt)
 
 
+T_e2c = [    1.0000         0         0   -0.0470;
+         0   -0.9755    0.2198    0.0500;
+         0   -0.2198   -0.9755   -0.0900;
+         0         0         0    1.0000];
+t_w_est1 = T_tb2rb * T_rb2e * T_e2c*cam_pose 
+[error_t_est1, overall_est1 ]= translationErrorBetweenPointsInWorld(wld_pose, t_w_est1)
 
 
 

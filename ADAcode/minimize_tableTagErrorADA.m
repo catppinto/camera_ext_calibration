@@ -2,8 +2,8 @@ function [F] = minimize_tableTagErrorADA(x, tags_train, corners, K_ext0)
 
 %% get projection data from ADA (init estimate) 
 load ADA_Data; 
-path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
-% path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
 load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'], 'T_rb2e')
 
 

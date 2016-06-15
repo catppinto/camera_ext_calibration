@@ -6,9 +6,9 @@
 
 clear
 clc
-% path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
 % addpath([path, 'bkg_code'])
-path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
 addpath([path 'bkg_code'])
 
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];

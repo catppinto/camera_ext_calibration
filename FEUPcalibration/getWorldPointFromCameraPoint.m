@@ -2,10 +2,6 @@ function [w_p] = getWorldPointFromCameraPoint(c_p, T)
 % Function discription : c_p must be a N*3 or N*4 point set. T is the
 % transformation matrix to be used. w_p is the point in the world frame, a
 % N*4 point / pointset
-% 
-% sdadas
-% 
-% sdads
 
 
 % R = T(1:3, 1:3);

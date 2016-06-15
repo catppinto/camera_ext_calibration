@@ -5,7 +5,7 @@ clear
 addpath(genpath('/home/apirespi/Documents/Thesis/ExtrinsicsCalibration/matlab_code/bkg_code'))
 addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/dataFrom20160520_173121bag')
 %% choose type of points 
-use_random_points = false;
+use_random_points = true;
 
 if(use_random_points)
     n = 100;

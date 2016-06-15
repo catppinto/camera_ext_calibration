@@ -41,37 +41,3 @@ w_test_manip = w_test_manip(1:3, 1);
 fprintf('w_test_manip : %3.7f, %3.7f, %3.7f \n', ...
         w_test_manip(1), w_test_manip(2), w_test_manip(3));
     
-
-%% perform IK
-pos = w_test_manip;
-rot = rotationAroundX(pi);
-  
-[theta_vector, s] = compute_ik(pos, rot);
-if(s)
-    
-    theta_vector(3) = theta_vector(3) + pi/4; 
-
-    [is_sing_J11, is_sing_J22, J, J11, J22] = find_singularities(theta_vector);
-
-    if ( is_sing_J11 )
-        disp('Has a singularity in the first part of the manipulator'); 
-    elseif (is_sing_J22)
-        disp('Has a singularity in the wrist joints'); 
-    else
-
-        [eef_xyz, eef_rot] = forward_kin_moreira(theta_vector);  
-
-        fprintf('GT xyz : %3.7f, %3.7f, %3.7f \n', ...
-            pos(1), pos(2), pos(3));
-
-        fprintf('PD xyz : %3.7f, %3.7f, %3.7f \n', ...
-            eef_xyz(1), eef_xyz(2), eef_xyz(3));
-
-        fprintf('PD joints : %3.7f, %3.7f, %3.7f, %3.7f, %3.7f, %3.7f \n', ...
-            theta_vector(1), theta_vector(2), theta_vector(3), ...
-            theta_vector(4), theta_vector(5), theta_vector(6));
-    end
-else
-    fprintf('Not reachable point \n');
-end
-
