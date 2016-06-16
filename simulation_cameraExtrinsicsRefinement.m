@@ -1,6 +1,13 @@
 clear
 clc
 
+path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+addpath([path, 'ADAcode'])
+
+
+noise_ratio = 0.05;
+
 % (1) Create world data from a table randomly 
 
 n = 100;
@@ -37,21 +44,25 @@ end
 
 
 %% (2) Create a T_wc matrix
+min_ = -0.2; max_ = 0.2;
+rx = min_ + (max_-min_).*rand(1,1); 
+rz = min_ + (max_-min_).*rand(1,1); 
 
-T_w2c = [0.9754 0.2206 0 -0.0470; ...
-         -0.2206 0.9754 0 0.05; ...
-         0 0 1 -0.09; ...
-         0 0 0 1];
+R_init = rodrigues([rx 0 rz]);
+min_ = 0; max_= 1;
+t_init = [min_ + (max_-min_).*rand(1); min_ + (max_-min_).*rand(1); min_ + (max_-min_).*rand(1)];
+
+T_w2c_init = [R_init , t_init; 0 0 0 1];
 
 % using T_w2c (perfect matrix)
 tagposes = T_w2tag;
 for n =1:size(T_w2tag,3)
    % passing T_c_tag
-   T_c_tag(:, :, n) = inv(T_w2c) * tagposes(:, :, n);
-   T_c_c1(:, :, n) = inv(T_w2c) * T_w2tag_c1(:, :, n);
-   T_c_c2(:, :, n) = inv(T_w2c) * T_w2tag_c2(:, :, n);
-   T_c_c3(:, :, n) = inv(T_w2c) * T_w2tag_c3(:, :, n);
-   T_c_c4(:, :, n) = inv(T_w2c) * T_w2tag_c4(:, :, n);
+   T_c_tag(:, :, n) = inv(T_w2c_init) * tagposes(:, :, n);
+   T_c_c1(:, :, n) = inv(T_w2c_init) * T_w2tag_c1(:, :, n);
+   T_c_c2(:, :, n) = inv(T_w2c_init) * T_w2tag_c2(:, :, n);
+   T_c_c3(:, :, n) = inv(T_w2c_init) * T_w2tag_c3(:, :, n);
+   T_c_c4(:, :, n) = inv(T_w2c_init) * T_w2tag_c4(:, :, n);
 end
 
 A = [529.2945         0  466.9604         0; ...
@@ -82,21 +93,20 @@ end
 % (3) Add Gaussian noise (statistically independent and addictive noise) to
 % data
 
-ratio = 0.3;
-a = rodrigues(T_w2c(1:3, 1:3));
+a = rodrigues(T_w2c_init(1:3, 1:3));
 N = randn(size(a));
-N = N*ratio;
+N = N*noise_ratio;
 a = a + N;
 R = rodrigues(a);
-t = T_w2c(1:3, 4);N = randn(size(t));N = N*ratio;
+t = T_w2c_init(1:3, 4);N = randn(size(t));N = N*noise_ratio;
 t = t + N;
-T_w2c_n = [R t; 0 0 0 1];
+T_w2c_init_n = [R t; 0 0 0 1];
 
 counter = 0;
 for i=1:size(T_c_tag,3) 
         
-    t_c = T_c_tag(:, :, i)
-    t_w = T_w2c_n * t_c
+    t_c = T_c_tag(:, :, i);
+    t_w = T_w2c_init_n * t_c;
   
     zhat_tag = t_w(1:3, 3);
     z_tag =  t_w(3, 4);
@@ -121,18 +131,15 @@ corners_test.c2 = c2(n/2+1:end, :);
 corners_test.c3 = c3(n/2+1:end, :);
 corners_test.c4 = c4(n/2+1:end, :);
 
-%% (4)run function
+%% (4)run PB function
 
 %  find x
-
-K_wc = T_w2c_n;
-
-w=rodrigues(K_wc(1:3, 1:3))
+w=rodrigues(T_w2c_init_n(1:3, 1:3));
 wx=w(1);
 wy=w(2);
 wz=w(3);
 
-x0 =[wx, wy, wz, K_wc(1,4), K_wc(2,4), K_wc(3,4)]
+x0 =[wx, wy, wz, T_w2c_init_n(1,4), T_w2c_init_n(2,4), T_w2c_init_n(3,4)]
 
 % optimization using fmincon
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
@@ -141,41 +148,9 @@ options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point
 % get refined extrinsics
 [R_est, t_est] = xToRt(x(1:6));
 
-KK = [R_est, t_est ; 0 0 0 1];
+T_w2c_PB = [R_est, t_est ; 0 0 0 1];
 
-T_w2c
-
-KK
-
-T_w2c_n
-
-
-%% error evaluation
-counter = 0;
-for i=n/2+1:size(T_c_tag,3)
-    counter = counter + 1;
-        
-    t_c = T_c_tag(:, :, i);
-    t_w_estimated = KK * t_c;
-    t_w_est(:, :, counter) = t_w_estimated;
-    
-%      t_w_real = T_w2c * t_c;
-    t_w_real = T_w2tag(:, :, i);
-%     t_w_reals(:, :, i) = t_w_real;
-    error_xyz(counter) = sqrt(sum( (t_w_estimated(1:3, 4) - t_w_real(1:3, 4)).^2));
-    error_z(counter) = sqrt(sum( (t_w_estimated(3, 4) - t_w_real(3, 4)).^2));
-    
-    error_rot(counter) = sqrt(sum( (rodrigues(t_w_estimated(1:3, 1:3)) - rodrigues(t_w_real(1:3, 1:3)) ).^2));
-    
-end
-error_xyz
-sum(error_xyz)
-
-sum(error_z)/(n/2)
-
-sum(error_rot)/(n/2)
-
-%% 
+%% Run World Known Poses Based Optimization (with test data)
 
 counter = 0;
 for i=n/2+1:size(T_c_tag,3)
@@ -183,119 +158,53 @@ for i=n/2+1:size(T_c_tag,3)
     cam_pose(:, counter) = [T_c_tag(:, 4, i)];
     wld_pose(:, counter) = [T_w2tag(:, 4, i)];
 end
-
-K_ec = KK;
      
-w=rodrigues(K_ec(1:3, 1:3));
+w=rodrigues(T_w2c_PB(1:3, 1:3));
 wx=w(1);
 wy=w(2);
 wz=w(3);
 
-x0 =[K_ec(1,4), K_ec(2,4), K_ec(3,4)];
+x0 =[T_w2c_PB(1,4), T_w2c_PB(2,4), T_w2c_PB(3,4)];
 
 % optimization using fmincon
 
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
 
-[x, fval, exittag] = fmincon(@simulation_wldpose,x0,[],[],[],[],[],[],[], options, wld_pose, cam_pose, K_ec);
+[x, fval, exittag] = fmincon(@simulation_wldpose,x0,[],[],[],[],[],[],[], options, wld_pose, cam_pose, T_w2c_PB);
 
 % get refined extrinsics
 t_est = x(1:3)';
 
-k_ec_opt = [K_ec(1:3, 1:3), t_est ; 0 0 0 1]
+T_w2c_WK = [T_w2c_PB(1:3, 1:3), t_est ; 0 0 0 1];
 
-K_ec
+%% Results
 
-t_w_opt = k_ec_opt*cam_pose 
+% matrices 
 
-t_w_prior_opt = K_ec*cam_pose
+T_w2c_init
 
-wld_pose
+T_w2c_init_n
+
+T_w2c_PB
+
+T_w2c_WK
+
+% world poses
+
+wld_pose;
+
+t_w_init_n = T_w2c_init_n *cam_pose;
+
+t_w_PB = T_w2c_PB*cam_pose;
+
+t_w_WK = T_w2c_WK*cam_pose;
 
 
 % error of projection 
 
-[error_t_opt, overall_opt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_opt)
-[error_t_prioropt, overall_prior_opt ]= translationErrorBetweenPointsInWorld(wld_pose, t_w_prior_opt)
+[mean_abs_error_init_n, std_deviation_init_n,  mean_error_3D_init_n, std_deviation_3D_init_n]  = translationErrorBetweenPointsInWorld(wld_pose, t_w_init_n)
 
+[mean_abs_error_pb, std_deviation_pb,  mean_error_3D_pb, std_deviation_3D_pb]  = translationErrorBetweenPointsInWorld(wld_pose, t_w_PB)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%
-% %% corners
-% 
-% tag_size = 0.06;
-% ts = tag_size/2;
-% for i=1:size(t_w_reals,3)
-%     t = t_w_reals(:, :, i);
-%     corner1_est = t; corner1_est(1,4) = t(1,4)+ts; corner1_est(2,4) = t(2,4)+ts; 
-%     corner2_est = t; corner2_est(1,4) = t(1,4)-ts; corner2_est(2,4) = t(2,4)+ts;
-%     corner3_est = t; corner3_est(1,4) = t(1,4)-ts; corner3_est(2,4) = t(2,4)-ts;
-%     corner4_est = t; corner4_est(1,4) = t(1,4)+ts; corner4_est(2,4) = t(2,4)-ts;
-%     
-%     T_w1(:, :, i) = corner1_est; 
-%     T_w2(:, :, i) = corner2_est;
-%     T_w3(:, :, i) = corner3_est;
-%     T_w4(:, :, i) = corner4_est;
-% end
-% 
-% for n =1:size(t_w_reals,3)
-%    T_c1(:, :, n) = inv(KK) * T_w1(:, :, n);
-%    T_c2(:, :, n) = inv(KK) * T_w2(:, :, n);
-%    T_c3(:, :, n) = inv(KK) * T_w3(:, :, n);
-%    T_c4(:, :, n) = inv(KK) * T_w4(:, :, n);
-% end
-%         
-% c1_est = []; c2_est= []; c3_est= []; c4_est= [];
-% for n =1:size(t_w_reals,3)
-%    tc_1 = T_c1(:, :, n) ;
-%    corner1_est = A * tc_1(1:4, 4);
-%    c1_est(n, :) = [corner1_est(1)/corner1_est(3) corner1_est(2)/corner1_est(3) 1];
-% 
-%    tc_2 = T_c2(:, :, n) ;
-%    corner2_est = A * tc_2(1:4, 4);
-%    c2_est(n, :) = [corner2_est(1)/corner2_est(3) corner2_est(2)/corner2_est(3) 1];
-%    
-%    tc_3 = T_c3(:, :, n) ;
-%    corner3_est = A * tc_3(1:4, 4);
-%    c3_est(n, :) = [corner3_est(1)/corner3_est(3) corner3_est(2)/corner3_est(3) 1];
-%    
-%    tc_4 = T_c4(:, :, n) ;
-%    corner4_est = A * tc_4(1:4, 4);
-%    c4_est(n, :) = [corner4_est(1)/corner4_est(3) corner4_est(2)/corner4_est(3) 1];
-% end
-% 
-% for n =1:size(t_w_reals,3)
-%     norm_c1(n) = norm(c1_est(n, :) - c1(n, :));
-%     norm_c2(n) = norm(c2_est(n, :) - c2(n, :));
-%     norm_c3(n) = norm(c3_est(n, :) - c3(n, :));
-%     norm_c4(n) = norm(c4_est(n, :) - c4(n, :));
-% end
-% 
-% reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
+[mean_abs_error_wk, std_deviation_wk,  mean_error_3D_wk, std_deviation_3D_wk]  = translationErrorBetweenPointsInWorld(wld_pose, t_w_WK)
 

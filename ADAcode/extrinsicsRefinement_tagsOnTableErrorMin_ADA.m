@@ -6,29 +6,27 @@
 
 clear
 clc
-path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+% path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
 % addpath([path, 'bkg_code'])
-% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
 addpath([path 'bkg_code'])
-
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
-%% TRAINING
-
 %% LOADING DATA
 load ADA_Data; %% A, K, P
 load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'])
 corners = [];
 
+disp('Perform Physics Based Refinement')
 %%  find x
 
-K_wc = T_e2c;
+init_K = T_e2c;
 
-w=rodrigues(K_wc(1:3, 1:3));
+w=rodrigues(init_K(1:3, 1:3));
 wx=w(1);
 wy=w(2);
 wz=w(3);
 
-x0 =[wx, wy, wz, K_wc(1,4), K_wc(2,4), K_wc(3,4)]
+x0 =[wx, wy, wz, init_K(1,4), init_K(2,4), init_K(3,4)]
 
 %% optimization using fmincon
 
@@ -39,9 +37,9 @@ options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point
 % get refined extrinsics
 [R_est, t_est] = xToRt(x(1:6));
 
-KK = [R_est, t_est ; 0 0 0 1]
+PB_K = [R_est, t_est ; 0 0 0 1]
 
-K_wc
+init_K
 
 %% Parameter Refinement
 
@@ -65,12 +63,12 @@ for i=1:size(tags_train.pose,1)
     q = t(4:7);
     t_c(1:3, 1:3) = quatToRotationMatrix(q);
     
-    t_wr = T_tb2rb * T_rb2e * K_wc * t_c;
+    t_wr = T_tb2rb * T_rb2e * init_K * t_c;
     t_wr = tag_rotation_offset * t_wr;
     fprintf('real: %3.7f \n', t_wr(3,4)); 
     t_w_estimatesr(:, :, i) =t_wr;
     
-    t_wo = T_tb2rb * T_rb2e * KK * t_c;
+    t_wo = T_tb2rb * T_rb2e * PB_K * t_c;
     t_wo = tag_rotation_offset * t_wo;
     fprintf('opt: %3.7f \n\n', t_wo(3,4)); 
     t_w_estimateso(:, :, i) =t_wo;
@@ -93,54 +91,62 @@ for i=1:size(tags_train.pose,1)
    
 end
 
-% %% corners
-% t_w_estimates = t_w_estimatesr;
-% tag_size = 0.06;
-% ts = tag_size/2;
-% for i=1:size(t_w_estimates,3)
-%     t = t_w_estimates(:, :, i);
-%     corner1_est = t; corner1_est(1,4) = t(1,4)+ts; corner1_est(2,4) = t(2,4)+ts; 
-%     corner2_est = t; corner2_est(1,4) = t(1,4)-ts; corner2_est(2,4) = t(2,4)+ts;
-%     corner3_est = t; corner3_est(1,4) = t(1,4)-ts; corner3_est(2,4) = t(2,4)-ts;
-%     corner4_est = t; corner4_est(1,4) = t(1,4)+ts; corner4_est(2,4) = t(2,4)-ts;
-%     
-%     T_w1(:, :, i) = corner1_est; 
-%     T_w2(:, :, i) = corner2_est;
-%     T_w3(:, :, i) = corner3_est;
-%     T_w4(:, :, i) = corner4_est;
-% end
-% 
-% for n =1:size(t_w_estimates,3)
-%    T_c1(:, :, n) = inv(K_wc) * T_w1(:, :, n);
-%    T_c2(:, :, n) = inv(K_wc) * T_w2(:, :, n);
-%    T_c3(:, :, n) = inv(K_wc) * T_w3(:, :, n);
-%    T_c4(:, :, n) = inv(K_wc) * T_w4(:, :, n);
-% end
-%         
-% c1_est = []; c2_est= []; c3_est= []; c4_est= [];
-% for n =1:size(t_w_estimates,3)
-%    tc_1 = T_c1(:, :, n) ;
-%    corner1_est = A * tc_1(1:4, 4);
-%    c1_est(n, :) = [corner1_est(1)/corner1_est(3) corner1_est(2)/corner1_est(3) 1];
-% 
-%    tc_2 = T_c2(:, :, n) ;
-%    corner2_est = A * tc_2(1:4, 4);
-%    c2_est(n, :) = [corner2_est(1)/corner2_est(3) corner2_est(2)/corner2_est(3) 1];
-%    
-%    tc_3 = T_c3(:, :, n) ;
-%    corner3_est = A * tc_3(1:4, 4);
-%    c3_est(n, :) = [corner3_est(1)/corner3_est(3) corner3_est(2)/corner3_est(3) 1];
-%    
-%    tc_4 = T_c4(:, :, n) ;
-%    corner4_est = A * tc_4(1:4, 4);
-%    c4_est(n, :) = [corner4_est(1)/corner4_est(3) corner4_est(2)/corner4_est(3) 1];
-% end
-% 
-% for n =1:size(t_w_estimates,3)
-%     norm_c1(n) = norm(c1_est(n, :) - corners.c3(n, :));
-%     norm_c2(n) = norm(c2_est(n, :) - corners.c4(n, :));
-%     norm_c3(n) = norm(c3_est(n, :) - corners.c1(n, :));
-%     norm_c4(n) = norm(c4_est(n, :) - corners.c2(n, :));
-% end
-% 
-% reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
+
+%% Perform World Known Poses Refinement
+disp('Perform World Known Poses Refinement')
+load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+%%  find x
+
+w=rodrigues(PB_K(1:3, 1:3));
+wx=w(1);
+wy=w(2);
+wz=w(3);
+
+x0 =[PB_K(1,4), PB_K(2,4), PB_K(3,4)];
+
+wld_pose = [tags.worldpose(:, :) ones(size(tags.worldpose,1), 1)]';
+cam_pose = [tags.pose(:, 1:3) ones(size(tags.worldpose,1), 1)]';
+
+%% optimization using fmincon
+
+options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
+
+[x, fval, exittag] = fmincon(@wldpose_minimization_ADA,x0,[],[],[],[],[],[],[], options, wld_pose, cam_pose, PB_K);
+
+% get refined extrinsics
+t_est = x(1:3)';
+
+WK_K = [PB_K(1:3, 1:3), t_est ; 0 0 0 1];
+
+WK_K
+
+%% show results
+
+% matrices
+init_K
+
+PB_K
+
+WK_K
+
+
+% world poses
+
+wld_pose
+
+t_w_init = T_tb2rb * T_rb2e * init_K *cam_pose
+
+t_w_PB = T_tb2rb * T_rb2e * PB_K * cam_pose
+
+t_w_WK = T_tb2rb * T_rb2e * WK_K * cam_pose  
+
+
+%% errors 
+
+[mean_abs_error_i, std_deviation_i,  mean_error_3D_i, std_deviation_3D_i] = translationErrorBetweenPointsInWorld(wld_pose, t_w_init)
+
+[mean_abs_error_prioropt, std_deviation_prioropt,  mean_error_3D_prioropt, std_deviation_3D_prioropt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_PB)
+
+[mean_abs_error_opt, std_deviation_opt,  mean_error_3D_opt, std_deviation_3D_opt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_WK)
+
+

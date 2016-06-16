@@ -4,7 +4,6 @@ zhat_table = [0 0 1]';
 z_table = 0.5;   
 
 alpha = 10;
-gamma = [0.01 0.001]';
 delta = 10;
 
 A = [529.2945         0  466.9604         0; ...
@@ -40,19 +39,14 @@ for i=1:size(tagposes,3)
        
 end
 
-% for i=1:size(tagposes,3) 
-%     K_wc_tag = inv(tagposes(:, :, i)) * t_w_estimates(:, :, i);  
-%     r_wc_tag = rodrigues(K_wc_tag(1:3, 1:3));
-%     t_wc_tag = K_wc_tag(1:3,4);
-%     k_(:, i) = [r_wc_tag' t_wc_tag'];
-% end
-% variance_k = var(k_, 0, 2);
-% variance_k = sum(variance_k(4:6));
-
+% norm extrinsics
+gamma = [0.0001 10 10 0.01]';
+t_ext0 = K_ext0(4:6); 
+norm_tExt = [abs(t_ext0(1) - x(4)).^2; 
+     abs(t_ext0(2) - x(5)).^2;
+     abs(t_ext0(3) - x(6)).^2];
 r_ext0 = K_ext0(1:3); 
 norm_rExt = norm(r_ext0 - x(1:3));
-t_ext0 = K_ext0(4:6); 
-norm_tExt = norm(t_ext0 - x(4:6));
 norm_ext = [norm_rExt ; norm_tExt];
 
 %% corners
@@ -109,7 +103,7 @@ reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
 
 
 %% cost function 
-F = sum(norm_z) + sum(alpha*theta_error) + sum(gamma.*norm_ext) + delta*reprojection_error; 
+F = 5*sum(norm_z) + sum(alpha*theta_error) + 10*sum(gamma.*norm_ext) + delta*reprojection_error; 
 
 
 

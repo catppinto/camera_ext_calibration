@@ -1,15 +1,47 @@
 function F = simulation_wldpose(x, wld_pose, cam_pose, K_ec)
 
+% %%
+% alpha = 10;
+% beta = [ 10 10 100]';
+% 
+% k= K_ec(1:3, 1:3);
+% t_Est = [x(1); x(2); x(3)];
+% k = [k t_Est; 0 0 0 1];
+% 
+% t_w = k*cam_pose; 
+% 
+% if(size(wld_pose, 2) ==1 ) 
+%     error = sqrt((wld_pose(1) - t_w(1))^2 + ...
+%         (wld_pose(2) - t_w(2))^2 + ...
+%         (wld_pose(3) - t_w(3))^2 );
+%     d = sqrt((t_Est(1) - K_ec(1,4))^2 + ...
+%         (t_Est(2) - K_ec(2,4))^2  + ...
+%         (t_Est(3) - K_ec(3,4))^2 );
+%     F = error + alpha * d;
+% else
+%     error = [sqrt( (wld_pose(1,:) - t_w(1, :)).^2) ; 
+%              sqrt( (wld_pose(2, :) - t_w(2,:)).^2) ;
+%              sqrt(  (wld_pose(3, :) - t_w(3, :)).^2)];
+%     error = sum(error,2);
+%     d = sqrt((t_Est(1) - K_ec(1,4))^2 + (t_Est(2) - K_ec(2,4))^2  + (t_Est(3) - K_ec(3,4))^2 );
+%     F = sum(beta.*error) + alpha * d;
+%     
+% end
+% 
+
 %%
-alpha = 10;
-beta = [ 10 10 100]';
+alpha = [ 0.01 0.01 1000]';
+beta = [ 1000 1000 0.1]';
+% load ADA_Data;
+% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+% % path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+% load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
 
 k= K_ec(1:3, 1:3);
 t_Est = [x(1); x(2); x(3)];
-% k = [k [t_Est; K_ec(3, 4)]; 0 0 0 1];
 k = [k t_Est; 0 0 0 1];
 
-t_w = k*cam_pose; 
+t_w = k*cam_pose;
 
 if(size(wld_pose, 2) ==1 ) 
     error = sqrt((wld_pose(1) - t_w(1))^2 + ...
@@ -20,11 +52,13 @@ if(size(wld_pose, 2) ==1 )
         (t_Est(3) - K_ec(3,4))^2 );
     F = error + alpha * d;
 else
-    error = [sqrt( (wld_pose(1,:) - t_w(1, :)).^2) ; 
-             sqrt( (wld_pose(2, :) - t_w(2,:)).^2) ;
-             sqrt(  (wld_pose(3, :) - t_w(3, :)).^2)];
+    error = [abs( (wld_pose(1,:) - t_w(1, :))) ; 
+             abs( (wld_pose(2, :) - t_w(2,:))) ;
+             abs( (wld_pose(3, :) - t_w(3, :)))];
     error = sum(error,2);
-    d = sqrt((t_Est(1) - K_ec(1,4))^2 + (t_Est(2) - K_ec(2,4))^2  + (t_Est(3) - K_ec(3,4))^2 );
-    F = sum(beta.*error) + alpha * d;
+    d = [abs(t_Est(1) - K_ec(1,4)); 
+         abs(t_Est(2) - K_ec(2,4));
+         abs(t_Est(3) - K_ec(3,4)).^2];
+    F = sum(beta.*error) + sum(alpha .* d);
     
 end

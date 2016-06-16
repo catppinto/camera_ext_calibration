@@ -1,7 +1,7 @@
 clear
 clc
 path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
-% path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
 addpath([path, 'bkg_code'])
 %addpath('/homes/apirespi/cat_workspace/src/ExtrinsicsCalibration/matlab_code/bkg_code')
 
@@ -63,16 +63,20 @@ wld_pose
 
 %% error of projection 
 
-[error_t_opt, overall_opt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_opt)
-[error_t_prioropt, overall_prior_opt ]= translationErrorBetweenPointsInWorld(wld_pose, t_w_prior_opt)
-
 
 T_e2c = [    1.0000         0         0   -0.0470;
          0   -0.9755    0.2198    0.0500;
          0   -0.2198   -0.9755   -0.0900;
          0         0         0    1.0000];
 t_w_est1 = T_tb2rb * T_rb2e * T_e2c*cam_pose 
-[error_t_est1, overall_est1 ]= translationErrorBetweenPointsInWorld(wld_pose, t_w_est1)
+
+[mean_abs_error_i, std_deviation_i,  mean_error_3D_i, std_deviation_3D_i] = translationErrorBetweenPointsInWorld(wld_pose, t_w_est1)
+
+
+[mean_abs_error_prioropt, std_deviation_prioropt,  mean_error_3D_prioropt, std_deviation_3D_prioropt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_prior_opt)
+
+[mean_abs_error_opt, std_deviation_opt,  mean_error_3D_opt, std_deviation_3D_opt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_opt)
+
 
 
 

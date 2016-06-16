@@ -2,7 +2,6 @@
 % clc
 % clear all
 
-addpath(genpath('/home/cat/Documents/tese/HOPE_matlab'));
 n= 4;
 
 w = [0.7005 0.024 0; ... 
@@ -24,47 +23,48 @@ ctag = [-0.322713 0.0119508 0.671776; ...
     0.00249965 -0.0216926 0.685821];
 ctag_h = [ctag ones(8,1)]';
 
-T = performCalibration(w, ctag); 
+K_rigid = performCalibration(w, ctag); 
 
 %% point in world frame
-[w_p] = getWorldPointFromCameraPoint(ctag, T);
+[w_p] = getWorldPointFromCameraPoint(ctag, K_rigid);
 w_test = w_p(n, :); 
 
-addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/bkg_code')
-addpath('/home/cat/Documents/CMU_Herb/camera_ext_calibration/ADAcode')
-
 %%  find x
-
-K_ec = T;
   
-x0 =[K_ec(1,4), K_ec(2,4), K_ec(3,4)];
+x0 =[K_rigid(1,4), K_rigid(2,4), K_rigid(3,4)];
 
 ctag = [ctag ones(size(ctag,1), 1)]'; 
 w = [w ones(size(w,1), 1)]';
-%% optimization using fmincon
-
+%% World Known Poses Based Optimization
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
 
-[x, fval, exittag] = fmincon(@wldpose_minimization_FEUP,x0,[],[],[],[],[],[],[], options, w, ctag, K_ec);
+[x, fval, exittag] = fmincon(@wldpose_minimization_FEUP,x0,[],[],[],[],[],[],[], options, w, ctag, K_rigid);
 
 % get refined extrinsics
 t_est = x(1:3)';
 
-k_ec_opt = [K_ec(1:3, 1:3), t_est ; 0 0 0 1]
+K_WK = [K_rigid(1:3, 1:3), t_est ; 0 0 0 1];
 
-K_ec
+%% Results
 
-t_w_opt =  k_ec_opt * ctag 
+% matrices
 
-t_w_prior_opt =  K_ec * ctag
+K_rigid
 
-w
+K_WK
+
+% world poses
+
+t_w_rigid =  K_rigid * ctag
+
+t_w_wk =  K_WK * ctag 
 
 
 %% error of projection 
 
-[error_t_opt, overall_opt] = translationErrorBetweenPointsInWorld(w, t_w_opt)
-[error_t_prioropt, overall_prior_opt ]= translationErrorBetweenPointsInWorld(w, t_w_prior_opt)
+[mean_abs_error_rig, std_deviation_rig,  mean_error_3D_rig, std_deviation_3D_rig] = translationErrorBetweenPointsInWorld(w, t_w_rigid)
+
+[mean_abs_error_wk, std_deviation_wk,  mean_error_3D_wk, std_deviation_3D_wk]  = translationErrorBetweenPointsInWorld(w, t_w_wk)
 
 
 
