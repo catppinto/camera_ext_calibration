@@ -6,7 +6,8 @@ beta = [ 1000 1000 0.1]';
 load ADA_Data;
 path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
 % path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
-load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+% load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+load([path, 'dataFromADA/ADA_depthtests_gt.mat'])
 
 k= K_ec(1:3, 1:3);
 t_Est = [x(1); x(2); x(3)];

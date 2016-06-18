@@ -13,13 +13,20 @@ addpath([path 'bkg_code'])
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 %% LOADING DATA
 load ADA_Data; %% A, K, P
-load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'])
+%load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'])
+load([path, 'dataFromADA/ADA_depthtests.mat'])
+load([path, 'dataFromADA/ADA_depthtests_gt.mat'], 'T_rb2e')
+tags_train = tags; %% change this 
+
 corners = [];
 
 disp('Perform Physics Based Refinement')
 %%  find x
 
-init_K = T_e2c;
+init_K =    [ 1.0000    0.0000    0.0000   -0.3995
+    0.0000   -0.9639    0.2663    0.4263
+   -0.0000   -0.2663   -0.9639    0.7148
+         0         0         0    1.0000];
 
 w=rodrigues(init_K(1:3, 1:3));
 wx=w(1);
@@ -29,10 +36,9 @@ wz=w(3);
 x0 =[wx, wy, wz, init_K(1,4), init_K(2,4), init_K(3,4)]
 
 %% optimization using fmincon
-
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
 
-[x, fval, exittag] = fmincon(@minimize_tableTagErrorADA,x0,[],[],[],[],[],[],[], options, tags_train.pose, tags_train.corners, x0);
+[x, fval, exittag] = fmincon(@minimize_tableTagErrorADA,x0,[],[],[],[],[],[],[], options, tags_train.pose, x0);
 
 % get refined extrinsics
 [R_est, t_est] = xToRt(x(1:6));
@@ -54,14 +60,37 @@ A = [567.7969970703125, 0.0, 319.5, 0.0; ...
 % FROM REAL data
 counter=0;
 zhat_tag = [];
-for i=1:size(tags_train.pose,1) 
+
+
+fullcampose = false;
+if(length(size(tags_train.pose)) > 2)
+    fullcampose = true;
+end
+if(fullcampose)
+    s = size(tags_train,3); 
+else
+    s = size(tags_train,1);
+end
+
+ if(fullcampose)
+    tag_rotation_offset = eye(4);
+else
+    tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
+ end
+
+for i=1:s
      
-    t = tags_train.pose(i, :);
-    
-    t_c = eye(4,4); 
-    t_c(1:3, 4) = t(1:3);
-    q = t(4:7);
-    t_c(1:3, 1:3) = quatToRotationMatrix(q);
+           
+    if(fullcampose)
+        t = tags_train.pose(:,  :, 1);
+        t_c = t;
+    else
+        t = tags_train.pose(i, :);
+        t_c = eye(4,4); 
+        t_c(1:3, 4) = t(1:3);
+        q = t(4:7);
+        t_c(1:3, 1:3) = quatToRotationMatrix(q);
+    end
     
     t_wr = T_tb2rb * T_rb2e * init_K * t_c;
     t_wr = tag_rotation_offset * t_wr;
@@ -94,7 +123,8 @@ end
 
 %% Perform World Known Poses Refinement
 disp('Perform World Known Poses Refinement')
-load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+% load([path, 'dataFromADA/ADAtags_14062016_wldPoseTag.mat'])
+load([path, 'dataFromADA/ADA_depthtests_gt.mat'])
 %%  find x
 
 w=rodrigues(PB_K(1:3, 1:3));
@@ -105,8 +135,15 @@ wz=w(3);
 x0 =[PB_K(1,4), PB_K(2,4), PB_K(3,4)];
 
 wld_pose = [tags.worldpose(:, :) ones(size(tags.worldpose,1), 1)]';
-cam_pose = [tags.pose(:, 1:3) ones(size(tags.worldpose,1), 1)]';
 
+if(fullcampose)
+    for t = 1:size(tags.pose,3)
+        tag = tags.pose(:, :, t);
+        cam_pose(:, t) = tag(:, 4);
+    end
+else
+    cam_pose = [tags.pose(:, 1:3) ones(size(tags.worldpose,1), 1)]';
+end
 %% optimization using fmincon
 
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
@@ -148,5 +185,11 @@ t_w_WK = T_tb2rb * T_rb2e * WK_K * cam_pose
 [mean_abs_error_prioropt, std_deviation_prioropt,  mean_error_3D_prioropt, std_deviation_3D_prioropt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_PB)
 
 [mean_abs_error_opt, std_deviation_opt,  mean_error_3D_opt, std_deviation_3D_opt] = translationErrorBetweenPointsInWorld(wld_pose, t_w_WK)
+
+
+
+
+
+
 
 

@@ -1,22 +1,29 @@
-function [F] = minimize_tableTagErrorADA(x, tags_train, corners, K_ext0)
+function [F] = minimize_tableTagErrorADA(x, tags_train, K_ext0)
 
 %% get projection data from ADA (init estimate) 
 load ADA_Data; 
-load('T_rb2e_13062016.mat')
+path = '~/cat_workspace/src/ExtrinsicsCalibration/matlab_code/';
+% path = '/home/cat/Documents/CMU_Herb/camera_ext_calibration/';
+load([path, 'dataFromADA/ADAtags_13062016_trueSizeTag.mat'], 'T_rb2e')
 
+fullcampose = false;
+if(length(size(tags_train)) > 2)
+    fullcampose = true;
+end
+    
 zhat_table = [0 0 1]';
 z_table = tag_height;   
 
-alpha = 500;
+alpha = 10;
 gamma = [0.01 0.001]';
-psi = 10;
+psi = 10000;
+psi_neg = 1000;
        
 A = [567.7969970703125, 0.0, 319.5, 0.0; ...
      0.0, 567.7969970703125, 239.5, 0.0;...
      0.0, 0.0, 1.0, 0.0;...
      0.0, 0.0, 0.0, 1.0];
  
-tag_rotation_offset2 = [-0 -1 0 0; -1 0 0 0 ; 0 0 -1 0 ; 0 0 0 1];
 tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 %% Conversion to R,t extrinsiccs 
 
@@ -25,10 +32,15 @@ t_wc=[x(4);x(5);x(6)];
 
 K_wc_est = [R_wc t_wc ; 0 0 0 1];
 
+if(fullcampose)
+    s = size(tags_train,3); 
+else
+    s = size(tags_train,1);
+end
 
 %% Load Tag Poses
 counter = 0;
-for i=1:size(tags_train,1) 
+for i=1:s
     
     t = tags_train(i, :);
     
@@ -48,6 +60,12 @@ for i=1:size(tags_train,1)
     z_tag =  t_w(3, 4);
     counter = counter + 1;
     norm_z(counter) = norm(z_tag - z_table);
+    
+    if(z_tag < 0)
+        negativeZ(counter) = abs(z_tag);
+    else
+        negativeZ(counter) = 0; 
+    end;
     
     CosTheta = dot(zhat_tag,zhat_table)/(norm(zhat_tag)*norm(zhat_table));
     theta_error(counter) = acos(CosTheta);
@@ -113,13 +131,9 @@ end
 reprojection_error = sum(norm_c1) + sum(norm_c2) + sum(norm_c3) + sum(norm_c4);
 
 
-world
-for i = 1:size(t_w_estimates, 3) 
-    t_w_estimates
-end
-
-
 %% cost function 
-F = sum(psi*norm_z) + sum(alpha*theta_error) + sum(gamma.*norm_ext) + sum(t_w); % + delta*reprojection_error; 
+F = sum(psi*norm_z)+ psi_neg*sum(negativeZ) + sum(alpha*theta_error); % + sum(gamma.*norm_ext); % + delta*reprojection_error; 
+% delta = 1;
+% F = sum(psi*norm_z)+ psi_neg*sum(negativeZ) + sum(alpha*theta_error) + delta*reprojection_error; 
 
 
