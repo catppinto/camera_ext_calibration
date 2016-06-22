@@ -49,10 +49,7 @@ A = [567.7969970703125, 0.0, 319.5, 0.0; ...
      0.0, 0.0, 1.0, 0.0;...
      0.0, 0.0, 0.0, 1.0];
 
-T_w2e =  T_rb2e;
-clear T_rb2e ;
-
-transforms = struct('T_w2rb', T_w2rb, 'T_w2e', T_w2e , 'T_tb2rb', T_tb2rb, ...
+transforms = struct('T_w2rb', T_w2rb, 'T_rb2e', T_rb2e , 'T_tb2rb', T_tb2rb, ...
                     'tag_rotation_offset', tag_rotation_offset, 'A', A, ...
                     'tag_height', tag_height);
 
@@ -64,10 +61,10 @@ disp('Perform Physics Based Refinement')
 % recover x
 init_K = T_e2c;
 
-init_K =    [ 1.0000    0.0000    0.0000   -0.3995;...
-    0.0000   -0.9639    0.2663    0.4263;...
-   -0.0000   -0.2663   -0.9639    0.7148;...
-         0         0         0    1.0000];
+% init_K =    [ 1.0000    0.0000    0.0000   -0.3995;...
+%     0.0000   -0.9639    0.2663    0.4263;...
+%    -0.0000   -0.2663   -0.9639    0.7148;...
+%          0         0         0    1.0000];
          
 w=rodrigues(init_K(1:3, 1:3));
 wx=w(1);
@@ -127,12 +124,12 @@ for i=1:s
         t_c(1:3, 1:3) = quatToRotationMatrix(q);
     end
     
-    t_wr = T_w2e * init_K * t_c;
+    t_wr = T_w2rb * T_rb2e * init_K * t_c;
     t_wr = [tag_rotation_offset(1:3,1:3) * t_wr(1:3,1:3) t_wr(1:3,4); 0 0 0 1];
     fprintf('real: %3.7f \n', t_wr(3,4)); 
     t_w_estimatesr(:, :, i) =t_wr;
     
-    t_wo = T_w2e * PB_K * t_c;
+    t_wo = T_w2rb * T_rb2e * PB_K * t_c;
     t_wo = [tag_rotation_offset(1:3,1:3) * t_wo(1:3,1:3) t_wo(1:3,4); 0 0 0 1];
     fprintf('opt: %3.7f \n\n', t_wo(3,4)); 
     t_w_estimateso(:, :, i) =t_wo;
@@ -154,35 +151,6 @@ for i=1:s
     theta_erroro(counter) = acos(CosTheta);
    
 end
-
-
-% load([path, 'dataFromADA/ADA_depthtests_gt.mat'])
-% wld_pose = [tags.worldpose(:, :) ones(size(tags.worldpose,1), 1)]';
-%%
-% 
-% init_K
-% 
-% PB_K
-% 
-% for i=1:s
-%              
-%     if(fullcampose)
-%         t = tags_train.pose(:,  :, i);
-%         t_c = t;       
-%     end
-%     
-%     t_w_init(:, i) =  T_rb2e * init_K * t_c(:,4);
-% 
-%     t_w_PB(:, i) =  T_rb2e * PB_K * t_c(:,4);
-% end
-% 
-% 
-% t_w_init
-% 
-% t_w_PB
-% 
-% [mean_abs_error, std_deviation,  mean_error_3D, std_deviation_3D] = translationErrorBetweenPointsInWorld(t_w_init, t_w_PB)
-% 
 
 %% Perform World Known Poses Refinement
 disp('Perform World Known Poses Refinement')
@@ -213,6 +181,9 @@ else
     cam_pose = [tags.pose(:, 1:3) ones(size(tags.worldpose,1), 1)]';
 end
 
+wld_pose(1, :) = wld_pose(1, :)+0.01; 
+wld_pose(2, :) = wld_pose(2, :)+0.04; 
+
 tag_in_world_gt = T_w2rb * T_rb2tb * wld_pose ;
 
 %% optimization using fmincon
@@ -240,11 +211,11 @@ WK_K
 
 tag_in_world_gt
 
-t_w_init =  T_rb2e * init_K * cam_pose
+t_w_init =  T_w2rb * T_rb2e * init_K * cam_pose
 
-t_w_PB =  T_rb2e * PB_K * cam_pose
+t_w_PB =  T_w2rb * T_rb2e * PB_K * cam_pose
 
-t_w_WK =  T_rb2e * WK_K * cam_pose  
+t_w_WK =  T_w2rb * T_rb2e * WK_K * cam_pose  
 
 
 %% errors 
@@ -257,12 +228,6 @@ t_w_WK =  T_rb2e * WK_K * cam_pose
 
 [mean_abs_error_WK, std_deviation_WK,  mean_error_3D_WK, std_deviation_3D_WK] = ...
     translationErrorBetweenPointsInWorld(tag_in_world_gt, t_w_WK);
-
-t_w_PB2 =  T_rb2e * [init_K(1:3, 1:3) PB_K(1:3, 4); 0 0 0 1] * cam_pose
-[mean_abs_error_PB2, std_deviation_PB2,  mean_error_3D_PB2, std_deviation_3D_PB2] = ...
-    translationErrorBetweenPointsInWorld(tag_in_world_gt, t_w_PB2)
-
-
 
 %% printing
 
@@ -302,6 +267,27 @@ fprintf('mean : %3.4f \n ', mean_error_3D_WK);
 
 std_deviation_3D_WK = 1000 * std_deviation_3D_WK;
 fprintf('std  : %3.4f \n ', std_deviation_3D_WK);
+
+%% extra 
+
+PB2_K = [init_K(1:3, 1:3) PB_K(1:3, 4); 0 0 0 1] 
+t_w_PB2 =  T_rb2e * [init_K(1:3, 1:3) PB_K(1:3, 4); 0 0 0 1] * cam_pose;
+[mean_abs_error_PB2, std_deviation_PB2,  mean_error_3D_PB2, std_deviation_3D_PB2] = ...
+    translationErrorBetweenPointsInWorld(tag_in_world_gt, t_w_PB2);
+
+
+mean_abs_error_PB2 = 1000 * mean_abs_error_PB2;
+fprintf('\n\n PB2  :\n mean : %3.4f , %3.4f , %3.4f \n ', mean_abs_error_PB2(1), mean_abs_error_PB2(2), mean_abs_error_PB2(3));
+
+std_deviation_PB2 = 1000 * std_deviation_PB2;
+fprintf('std  : %3.4f , %3.4f , %3.4f \n ', std_deviation_PB2(1), std_deviation_PB2(2), std_deviation_PB2(3));
+
+mean_error_3D_PB2 = 1000 * mean_error_3D_PB2;
+fprintf('mean : %3.4f \n ', mean_error_3D_PB2);
+
+std_deviation_3D_PB2 = 1000 * std_deviation_3D_PB2;
+fprintf('std  : %3.4f \n ', std_deviation_3D_PB2);
+
 
 
 

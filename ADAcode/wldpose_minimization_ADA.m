@@ -1,6 +1,7 @@
 function F = wldpose_minimization_ADA(x, wld_pose, cam_pose, K_ec, transforms)
 
-T_w2e = transforms.T_w2e;
+T_rb2e = transforms.T_rb2e;
+T_w2rb = transforms.T_w2rb;
 
 %%
 alpha = [ 0.001 0.001 0.1]';
@@ -10,7 +11,7 @@ k= K_ec(1:3, 1:3);
 t_Est = [x(1); x(2); x(3)];
 k = [k t_Est; 0 0 0 1];
 
-t_w = T_w2e * k*cam_pose; 
+t_w = T_w2rb * T_rb2e * k*cam_pose; 
 
 if(size(wld_pose, 2) ==1 ) 
     error = sqrt((wld_pose(1) - t_w(1))^2 + ...

@@ -2,7 +2,8 @@ function [F] = minimize_tableTagErrorADA(x, tags_train, K_ext0, transforms)
 
 %% get projection data from ADA (init estimate) 
 
-T_w2e = transforms.T_w2e;
+T_w2rb = transforms.T_w2rb;
+T_rb2e = transforms.T_rb2e;
 tag_height = transforms.tag_height;
 
 fullcampose = false;
@@ -14,7 +15,7 @@ zhat_table = [0 0 1]';
 z_table = tag_height;   
 
 alpha = 1;
-gamma = [0.01 0.01 0.01 0.01 0.01 0.001]';
+gamma = [0.01 0.01 0.01 0.1 0.1 0.01]';
 psi = 10;
  
 if(fullcampose)
@@ -53,7 +54,7 @@ for i=1:s
     end
         
     % for ADA
-    t_w = T_w2e * K_wc_est * t_c;
+    t_w = T_w2rb * T_rb2e * K_wc_est * t_c;
     t_w = [tag_rotation_offset(1:3,1:3) * t_w(1:3,1:3) t_w(1:3,4); 0 0 0 1];
        
     zhat_tag = -1*t_w(1:3, 3);
