@@ -11,7 +11,7 @@ if(length(size(tags_train)) > 2)
     fullcampose = true;
 end
     
-zhat_table = [0 0 1]';
+zhat_table = [0 0 -1]';
 z_table = tag_height;   
 
 alpha = 1;
@@ -19,7 +19,7 @@ gamma = [0.01 0.01 0.01 0.1 0.1 0.01]';
 psi = 10;
  
 if(fullcampose)
-    tag_rotation_offset = eye(4);
+    tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 else
     tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
 end
@@ -55,9 +55,9 @@ for i=1:s
         
     % for ADA
     t_w = T_w2rb * T_rb2e * K_wc_est * t_c;
-    t_w = [tag_rotation_offset(1:3,1:3) * t_w(1:3,1:3) t_w(1:3,4); 0 0 0 1];
+%     t_w = [tag_rotation_offset(1:3,1:3) * t_w(1:3,1:3) t_w(1:3,4); 0 0 0 1];
        
-    zhat_tag = -1*t_w(1:3, 3);
+    zhat_tag = t_w(1:3, 3);
     
     z_tag =  t_w(3, 4);
     counter = counter + 1;
@@ -70,7 +70,7 @@ for i=1:s
     end;
     
     CosTheta = dot(zhat_tag,zhat_table)/(norm(zhat_tag)*norm(zhat_table));
-    theta_error(counter) = acos(CosTheta);
+    theta_error(counter) = abs(acos(CosTheta));
        
 end
     

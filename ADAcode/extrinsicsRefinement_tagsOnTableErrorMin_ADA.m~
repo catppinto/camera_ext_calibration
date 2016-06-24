@@ -106,9 +106,9 @@ else
 end
 
 if(fullcampose)
-    tag_rotation_offset =[rotationAroundY(pi) [0;0;0]; 0 0 0 1]
+    tag_rotation_offset = eye(4);
 else
-    tag_rotation_offset = [rotationAroundY(pi) [0;0;0]; 0 0 0 1];
+    tag_rotation_offset = [rotationAroundX(pi) [0;0;0]; 0 0 0 1];
 end
 
 for i=1:s
@@ -134,10 +134,10 @@ for i=1:s
     fprintf('opt: %3.7f \n\n', t_wo(3,4)); 
     t_w_estimateso(:, :, i) =t_wo;
     
-    zhat_tagr = t_wr(1:3, 3);
+    zhat_tagr = -1*t_wr(1:3, 3);
     z_tagr =  t_wr(3, 4);
     
-    zhat_tago = t_wo(1:3, 3);
+    zhat_tago = -1*t_wo(1:3, 3);
     z_tago =  t_wo(3, 4);
     
     counter = counter + 1;
@@ -152,8 +152,8 @@ for i=1:s
    
 end
 
-zhat_tagr
-zhat_tago
+t_wr
+t_wo
 
 %% Perform World Known Poses Refinement
 disp('Perform World Known Poses Refinement')
@@ -166,14 +166,12 @@ end
 
 %%  find x
 
-PB2_K = [init_K(1:3, 1:3) PB_K(1:3, 4); 0 0 0 1] 
-
-w=rodrigues(PB2_K(1:3, 1:3));
+w=rodrigues(PB_K(1:3, 1:3));
 wx=w(1);
 wy=w(2);
 wz=w(3);
 
-x0 =[PB2_K(1,4), PB2_K(2,4), PB2_K(3,4)];
+x0 =[PB_K(1,4), PB_K(2,4), PB_K(3,4)];
 
 wld_pose = [tags.worldpose(:, :) ones(size(tags.worldpose,1), 1)]';
 
@@ -186,9 +184,8 @@ else
     cam_pose = [tags.pose(:, 1:3) ones(size(tags.worldpose,1), 1)]';
 end
 
-wld_pose(1, :) = wld_pose(1, :)+0.02; 
+wld_pose(1, :) = wld_pose(1, :)+0.01; 
 wld_pose(2, :) = wld_pose(2, :)+0.04; 
-wld_pose(3, :) = wld_pose(3, :)-0.005; 
 
 tag_in_world_gt = T_w2rb * T_rb2tb * wld_pose ;
 
@@ -196,12 +193,12 @@ tag_in_world_gt = T_w2rb * T_rb2tb * wld_pose ;
 
 options = optimoptions('fmincon', 'Display','iter', 'Algorithm', 'interior-point');
 
-[x, fval, exittag] = fmincon(@wldpose_minimization_ADA,x0,[],[],[],[],[],[],[], options, tag_in_world_gt, cam_pose, PB2_K, transforms);
+[x, fval, exittag] = fmincon(@wldpose_minimization_ADA,x0,[],[],[],[],[],[],[], options, tag_in_world_gt, cam_pose, PB_K, transforms);
 
 % get refined extrinsics
 t_est = x(1:3)';
 
-WK_K = [PB2_K(1:3, 1:3), t_est ; 0 0 0 1];
+WK_K = [PB_K(1:3, 1:3), t_est ; 0 0 0 1];
 
 %% show results
 
